@@ -1,0 +1,10 @@
+protos:
+  - "base/base.proto"
+  - "mua/im_relation.proto"
+  - "mua/im_common.proto"
+  - "mua/im_logic.proto"
+  - "mua/im_job.proto"
+  - "mua/im_sequence.proto"
+  - "mua/im_ap.proto"
+
+rel: github.com/tinyhole/im

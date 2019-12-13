@@ -1,0 +1,4 @@
+RegistryCenterAddr: http://127.0.0.1:2379
+ConfigCenterAddr: http://127.0.0.1:2379
+ConfigPath: /conf/mua/im/ap/
+SrvID: 1
