@@ -24,3 +24,4 @@ relation/log
 ap/log
 *.log
 go.sum
+test/test
