@@ -20,7 +20,7 @@ func NewInboxRepo(db *MgoDB) repository.Inbox {
 	}
 }
 
-func (i *inboxRepo) Get(inboxID int64, seq int64) (*entity.Message, error) {
+func (i *inboxRepo) Get(inboxID string, seq int64) (*entity.Message, error) {
 	var (
 		err error
 		ret entity.Message
@@ -41,11 +41,12 @@ func (i *inboxRepo) Get(inboxID int64, seq int64) (*entity.Message, error) {
 
 func (i *inboxRepo) Save(data *entity.Message) (err error) {
 	query := bson.M{
-		"_id": data.MsgID,
+		"msg_id":data.MsgID,
+		"inbox_id":data.InboxID,
 	}
+
 	update := bson.M{
 		"$setOnInsert": bson.M{
-			"inbox_id":     data.InboxID,
 			"src_id":       data.SrcID,
 			"dst_id":       data.DstID,
 			"msg_type":     data.MsgType,
@@ -60,3 +61,21 @@ func (i *inboxRepo) Save(data *entity.Message) (err error) {
 
 	return err
 }
+
+
+func (i *inboxRepo)List(inboxID string,seq, startTime, endTime int64,page, pageSize int32)(rets []*entity.Message,total int, err error){
+	query := bson.M{
+		"inbox_id":inboxID,
+		"time":bson.M{
+			"$gte":startTime,
+			"$lte":endTime,
+		},
+		"seq":bson.M{
+				"$gt":seq,
+		},
+	}
+
+	total,err = i.db.List(i.table,query,[]string{"+seq"},page,pageSize,&rets)
+	return
+}
+

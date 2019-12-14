@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/tinyhole/im/ap/tcpserver/client"
 	"github.com/tinyhole/im/idl/mua/im/ap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type Handler struct {
@@ -16,11 +14,12 @@ func NewHandler(cli client.Client) *Handler {
 	return &Handler{tcpClient: cli}
 }
 
-func (h *Handler) PushMsg(cxt context.Context, req *ap.PushMsgReq, rsp *ap.PushMsgRsp) (err error) {
-	err = h.tcpClient.Push(req.Fid, req.SrvName, req.MethodName, req.Data)
-	if err != nil {
-		return status.Error(codes.Internal, "push msg failed")
-	}
+func(h *Handler)Unicast(ctx context.Context, req *ap.UnicastReq, rsp *ap.UnicastRsp)(err error){
+	h.tcpClient.Unicast(req.Fid, req.SrvName, req.Endpoint, req.Data)
+	return nil
+}
 
+func (h *Handler)Broadcast(ctx context.Context, req *ap.BroadcastReq, rsp *ap.BroadcastRsp)(err error){
+	h.tcpClient.Broadcast(req.Fids, req.SrvName, req.Endpoint, req.Data)
 	return nil
 }

@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"context"
-	"fmt"
 	"github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/registry"
 	"github.com/micro/go-micro/registry/etcd"
@@ -26,9 +25,9 @@ func NewSequenceClient(conf *config.BaseConfig) gateway.SequenceClient {
 	}
 }
 
-func (s *sequenceClient) GetPrivateSeq(inboxID int64) (int64, error) {
+func (s *sequenceClient) GetPrivateSeq(inboxID string) (int64, error) {
 	req := &sequence.GetAutoIncrIDReq{
-		Key: fmt.Sprintf("p.%d", inboxID),
+		Key: inboxID,
 	}
 
 	rsp, err := s.svc.GetAutoIncrID(context.Background(), req)
@@ -38,9 +37,9 @@ func (s *sequenceClient) GetPrivateSeq(inboxID int64) (int64, error) {
 	return rsp.Id, err
 }
 
-func (s *sequenceClient) GetGroupSeq(inboxID int64) (int64, error) {
+func (s *sequenceClient) GetGroupSeq(inboxID string) (int64, error) {
 	req := &sequence.GetAutoIncrIDReq{
-		Key: fmt.Sprintf("g.%d", inboxID),
+		Key:inboxID,
 	}
 
 	rsp, err := s.svc.GetAutoIncrID(context.Background(), req)

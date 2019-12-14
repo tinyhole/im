@@ -20,119 +20,218 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type PushMsgReq struct {
+type UnicastReq struct {
 	Fid                  int64    `protobuf:"varint,1,opt,name=fid,proto3" json:"fid,omitempty"`
 	SrvName              string   `protobuf:"bytes,2,opt,name=srvName,proto3" json:"srvName,omitempty"`
-	MethodName           string   `protobuf:"bytes,3,opt,name=methodName,proto3" json:"methodName,omitempty"`
-	Data                 []byte   `protobuf:"bytes,4,opt,name=Data,proto3" json:"Data,omitempty"`
+	Endpoint             string   `protobuf:"bytes,3,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	Data                 []byte   `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *PushMsgReq) Reset()         { *m = PushMsgReq{} }
-func (m *PushMsgReq) String() string { return proto.CompactTextString(m) }
-func (*PushMsgReq) ProtoMessage()    {}
-func (*PushMsgReq) Descriptor() ([]byte, []int) {
+func (m *UnicastReq) Reset()         { *m = UnicastReq{} }
+func (m *UnicastReq) String() string { return proto.CompactTextString(m) }
+func (*UnicastReq) ProtoMessage()    {}
+func (*UnicastReq) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1f9886a9770c7491, []int{0}
 }
 
-func (m *PushMsgReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_PushMsgReq.Unmarshal(m, b)
+func (m *UnicastReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UnicastReq.Unmarshal(m, b)
 }
-func (m *PushMsgReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_PushMsgReq.Marshal(b, m, deterministic)
+func (m *UnicastReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UnicastReq.Marshal(b, m, deterministic)
 }
-func (m *PushMsgReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PushMsgReq.Merge(m, src)
+func (m *UnicastReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UnicastReq.Merge(m, src)
 }
-func (m *PushMsgReq) XXX_Size() int {
-	return xxx_messageInfo_PushMsgReq.Size(m)
+func (m *UnicastReq) XXX_Size() int {
+	return xxx_messageInfo_UnicastReq.Size(m)
 }
-func (m *PushMsgReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_PushMsgReq.DiscardUnknown(m)
+func (m *UnicastReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UnicastReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_PushMsgReq proto.InternalMessageInfo
+var xxx_messageInfo_UnicastReq proto.InternalMessageInfo
 
-func (m *PushMsgReq) GetFid() int64 {
+func (m *UnicastReq) GetFid() int64 {
 	if m != nil {
 		return m.Fid
 	}
 	return 0
 }
 
-func (m *PushMsgReq) GetSrvName() string {
+func (m *UnicastReq) GetSrvName() string {
 	if m != nil {
 		return m.SrvName
 	}
 	return ""
 }
 
-func (m *PushMsgReq) GetMethodName() string {
+func (m *UnicastReq) GetEndpoint() string {
 	if m != nil {
-		return m.MethodName
+		return m.Endpoint
 	}
 	return ""
 }
 
-func (m *PushMsgReq) GetData() []byte {
+func (m *UnicastReq) GetData() []byte {
 	if m != nil {
 		return m.Data
 	}
 	return nil
 }
 
-type PushMsgRsp struct {
+type UnicastRsp struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *PushMsgRsp) Reset()         { *m = PushMsgRsp{} }
-func (m *PushMsgRsp) String() string { return proto.CompactTextString(m) }
-func (*PushMsgRsp) ProtoMessage()    {}
-func (*PushMsgRsp) Descriptor() ([]byte, []int) {
+func (m *UnicastRsp) Reset()         { *m = UnicastRsp{} }
+func (m *UnicastRsp) String() string { return proto.CompactTextString(m) }
+func (*UnicastRsp) ProtoMessage()    {}
+func (*UnicastRsp) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1f9886a9770c7491, []int{1}
 }
 
-func (m *PushMsgRsp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_PushMsgRsp.Unmarshal(m, b)
+func (m *UnicastRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UnicastRsp.Unmarshal(m, b)
 }
-func (m *PushMsgRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_PushMsgRsp.Marshal(b, m, deterministic)
+func (m *UnicastRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UnicastRsp.Marshal(b, m, deterministic)
 }
-func (m *PushMsgRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PushMsgRsp.Merge(m, src)
+func (m *UnicastRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UnicastRsp.Merge(m, src)
 }
-func (m *PushMsgRsp) XXX_Size() int {
-	return xxx_messageInfo_PushMsgRsp.Size(m)
+func (m *UnicastRsp) XXX_Size() int {
+	return xxx_messageInfo_UnicastRsp.Size(m)
 }
-func (m *PushMsgRsp) XXX_DiscardUnknown() {
-	xxx_messageInfo_PushMsgRsp.DiscardUnknown(m)
+func (m *UnicastRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_UnicastRsp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_PushMsgRsp proto.InternalMessageInfo
+var xxx_messageInfo_UnicastRsp proto.InternalMessageInfo
+
+type BroadcastReq struct {
+	Fids                 []int64  `protobuf:"varint,1,rep,packed,name=fids,proto3" json:"fids,omitempty"`
+	SrvName              string   `protobuf:"bytes,2,opt,name=srvName,proto3" json:"srvName,omitempty"`
+	Endpoint             string   `protobuf:"bytes,3,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	Data                 []byte   `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BroadcastReq) Reset()         { *m = BroadcastReq{} }
+func (m *BroadcastReq) String() string { return proto.CompactTextString(m) }
+func (*BroadcastReq) ProtoMessage()    {}
+func (*BroadcastReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1f9886a9770c7491, []int{2}
+}
+
+func (m *BroadcastReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BroadcastReq.Unmarshal(m, b)
+}
+func (m *BroadcastReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BroadcastReq.Marshal(b, m, deterministic)
+}
+func (m *BroadcastReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BroadcastReq.Merge(m, src)
+}
+func (m *BroadcastReq) XXX_Size() int {
+	return xxx_messageInfo_BroadcastReq.Size(m)
+}
+func (m *BroadcastReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_BroadcastReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BroadcastReq proto.InternalMessageInfo
+
+func (m *BroadcastReq) GetFids() []int64 {
+	if m != nil {
+		return m.Fids
+	}
+	return nil
+}
+
+func (m *BroadcastReq) GetSrvName() string {
+	if m != nil {
+		return m.SrvName
+	}
+	return ""
+}
+
+func (m *BroadcastReq) GetEndpoint() string {
+	if m != nil {
+		return m.Endpoint
+	}
+	return ""
+}
+
+func (m *BroadcastReq) GetData() []byte {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
+type BroadcastRsp struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BroadcastRsp) Reset()         { *m = BroadcastRsp{} }
+func (m *BroadcastRsp) String() string { return proto.CompactTextString(m) }
+func (*BroadcastRsp) ProtoMessage()    {}
+func (*BroadcastRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1f9886a9770c7491, []int{3}
+}
+
+func (m *BroadcastRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BroadcastRsp.Unmarshal(m, b)
+}
+func (m *BroadcastRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BroadcastRsp.Marshal(b, m, deterministic)
+}
+func (m *BroadcastRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BroadcastRsp.Merge(m, src)
+}
+func (m *BroadcastRsp) XXX_Size() int {
+	return xxx_messageInfo_BroadcastRsp.Size(m)
+}
+func (m *BroadcastRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_BroadcastRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BroadcastRsp proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*PushMsgReq)(nil), "mua.im.ap.PushMsgReq")
-	proto.RegisterType((*PushMsgRsp)(nil), "mua.im.ap.PushMsgRsp")
+	proto.RegisterType((*UnicastReq)(nil), "mua.im.ap.UnicastReq")
+	proto.RegisterType((*UnicastRsp)(nil), "mua.im.ap.UnicastRsp")
+	proto.RegisterType((*BroadcastReq)(nil), "mua.im.ap.BroadcastReq")
+	proto.RegisterType((*BroadcastRsp)(nil), "mua.im.ap.BroadcastRsp")
 }
 
 func init() { proto.RegisterFile("mua/im_ap.proto", fileDescriptor_1f9886a9770c7491) }
 
 var fileDescriptor_1f9886a9770c7491 = []byte{
-	// 181 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xcf, 0x2d, 0x4d, 0xd4,
-	0xcf, 0xcc, 0x8d, 0x4f, 0x2c, 0xd0, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0xcc, 0x2d, 0x4d,
-	0xd4, 0xcb, 0xcc, 0xd5, 0x4b, 0x2c, 0x50, 0xca, 0xe1, 0xe2, 0x0a, 0x28, 0x2d, 0xce, 0xf0, 0x2d,
-	0x4e, 0x0f, 0x4a, 0x2d, 0x14, 0x12, 0xe0, 0x62, 0x4e, 0xcb, 0x4c, 0x91, 0x60, 0x54, 0x60, 0xd4,
-	0x60, 0x0e, 0x02, 0x31, 0x85, 0x24, 0xb8, 0xd8, 0x8b, 0x8b, 0xca, 0xfc, 0x12, 0x73, 0x53, 0x25,
-	0x98, 0x14, 0x18, 0x35, 0x38, 0x83, 0x60, 0x5c, 0x21, 0x39, 0x2e, 0xae, 0xdc, 0xd4, 0x92, 0x8c,
-	0xfc, 0x14, 0xb0, 0x24, 0x33, 0x58, 0x12, 0x49, 0x44, 0x48, 0x88, 0x8b, 0xc5, 0x25, 0xb1, 0x24,
-	0x51, 0x82, 0x45, 0x81, 0x51, 0x83, 0x27, 0x08, 0xcc, 0x56, 0xe2, 0x41, 0xd8, 0x56, 0x5c, 0x60,
-	0x64, 0xcb, 0xc5, 0xe4, 0x18, 0x20, 0x64, 0xce, 0xc5, 0x0e, 0x15, 0x13, 0x12, 0xd5, 0x83, 0x3b,
-	0x4c, 0x0f, 0xe1, 0x2a, 0x29, 0x6c, 0xc2, 0xc5, 0x05, 0x4e, 0xdc, 0x51, 0x9c, 0x10, 0x8f, 0xe9,
-	0x27, 0x16, 0x24, 0xb1, 0x81, 0x7d, 0x66, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0x02, 0x78, 0x10,
-	0x56, 0xec, 0x00, 0x00, 0x00,
+	// 234 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x91, 0x31, 0x4b, 0x04, 0x31,
+	0x10, 0x85, 0xc9, 0x65, 0xf1, 0xdc, 0x71, 0x51, 0x19, 0x10, 0xc3, 0x56, 0xcb, 0x56, 0x5b, 0xe5,
+	0x40, 0x0b, 0x2b, 0x0b, 0xef, 0x07, 0x88, 0x04, 0x6c, 0x6c, 0x64, 0x34, 0x7b, 0x18, 0x30, 0x9b,
+	0x71, 0x93, 0xb3, 0xf2, 0xc7, 0x8b, 0xd1, 0xdb, 0xdb, 0xe2, 0x4a, 0xbb, 0x37, 0x79, 0x21, 0x5f,
+	0xe6, 0x3d, 0x38, 0xf3, 0x5b, 0x5a, 0x39, 0xff, 0x4c, 0xac, 0x79, 0x0c, 0x29, 0x60, 0xe9, 0xb7,
+	0xa4, 0x9d, 0xd7, 0xc4, 0xed, 0x1b, 0xc0, 0xe3, 0xe0, 0x5e, 0x29, 0x26, 0xd3, 0x7f, 0xe0, 0x39,
+	0xc8, 0x8d, 0xb3, 0x4a, 0x34, 0xa2, 0x93, 0xe6, 0x47, 0xa2, 0x82, 0x65, 0x1c, 0x3f, 0xef, 0xc9,
+	0xf7, 0x6a, 0xd1, 0x88, 0xae, 0x34, 0xbb, 0x11, 0x6b, 0x38, 0xee, 0x07, 0xcb, 0xc1, 0x0d, 0x49,
+	0xc9, 0x6c, 0x4d, 0x33, 0x22, 0x14, 0x96, 0x12, 0xa9, 0xa2, 0x11, 0x5d, 0x65, 0xb2, 0x6e, 0xab,
+	0x3d, 0x29, 0x72, 0xfb, 0x0e, 0xd5, 0x7a, 0x0c, 0x64, 0x77, 0x64, 0x84, 0x62, 0xe3, 0x6c, 0x54,
+	0xa2, 0x91, 0x9d, 0x34, 0x59, 0xff, 0x23, 0xfb, 0x74, 0x4e, 0x8b, 0x7c, 0xf5, 0x05, 0x8b, 0xbb,
+	0x07, 0xbc, 0x81, 0xe5, 0xdf, 0x8f, 0xf0, 0x42, 0x4f, 0x91, 0xe8, 0x7d, 0x1e, 0xf5, 0xa1, 0xe3,
+	0xc8, 0x78, 0x0b, 0xe5, 0xf4, 0x1c, 0x5e, 0xce, 0xee, 0xcc, 0x57, 0xaa, 0x0f, 0x1b, 0x91, 0xd7,
+	0x27, 0x4f, 0xe5, 0x6f, 0x23, 0x2b, 0xe2, 0x97, 0xa3, 0x5c, 0xc9, 0xf5, 0x77, 0x00, 0x00, 0x00,
+	0xff, 0xff, 0x42, 0xfe, 0x2a, 0x27, 0xa5, 0x01, 0x00, 0x00,
 }

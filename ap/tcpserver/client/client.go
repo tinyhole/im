@@ -7,7 +7,8 @@ import (
 )
 
 type Client interface {
-	Push(fid int64, service, endpoint string, data []byte) error
+	Unicast(fid int64, service, endpoint string, data []byte) error
+	Broadcast(fids []int64, service, endpoint string, data []byte)error
 }
 
 type client struct{}
@@ -16,7 +17,7 @@ var (
 	APClient = &client{}
 )
 
-func (c *client) Push(fid int64, service, endpoint string, data []byte) error {
+func (c *client) Unicast(fid int64, service, endpoint string, data []byte) error {
 	socket, err := bucket.DefaultSocketBucket.Get(fid)
 	if err != nil {
 		return errors.Wrapf(err, "DefaultSocketBucket.Get(%d)", fid)
@@ -33,6 +34,28 @@ func (c *client) Push(fid int64, service, endpoint string, data []byte) error {
 		},
 		Body: data,
 	}
-	socket.Send(req)
+	return socket.Send(req)
+}
+
+func (c *client)Broadcast(fids  []int64, service,endpoint string, data []byte)error{
+	req := &pack.ApPackage{
+		Header: &pack.Header{
+			Request: &pack.RequestMeta{
+				ServiceName: service,
+				Endpoint:    endpoint,
+				CallType:    pack.CallType_Push,
+			},
+			Seq: 0,
+		},
+		Body: data,
+	}
+	for _, fid := range fids {
+		socket, err := bucket.DefaultSocketBucket.Get(fid)
+		if err != nil {
+			continue
+		}
+		socket.Send(req)
+	}
+
 	return nil
 }

@@ -8,8 +8,10 @@ It is generated from these files:
 	mua/im_ap.proto
 
 It has these top-level messages:
-	PushMsgReq
-	PushMsgRsp
+	UnicastReq
+	UnicastRsp
+	BroadcastReq
+	BroadcastRsp
 */
 package ap
 
@@ -42,7 +44,8 @@ var _ server.Option
 // Client API for AP service
 
 type APService interface {
-	PushMsg(ctx context.Context, in *PushMsgReq, opts ...client.CallOption) (*PushMsgRsp, error)
+	Unicast(ctx context.Context, in *UnicastReq, opts ...client.CallOption) (*UnicastRsp, error)
+	Broadcast(ctx context.Context, in *BroadcastReq, opts ...client.CallOption) (*BroadcastRsp, error)
 }
 
 type aPService struct {
@@ -63,9 +66,19 @@ func NewAPService(name string, c client.Client) APService {
 	}
 }
 
-func (c *aPService) PushMsg(ctx context.Context, in *PushMsgReq, opts ...client.CallOption) (*PushMsgRsp, error) {
-	req := c.c.NewRequest(c.name, "AP.PushMsg", in)
-	out := new(PushMsgRsp)
+func (c *aPService) Unicast(ctx context.Context, in *UnicastReq, opts ...client.CallOption) (*UnicastRsp, error) {
+	req := c.c.NewRequest(c.name, "AP.Unicast", in)
+	out := new(UnicastRsp)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aPService) Broadcast(ctx context.Context, in *BroadcastReq, opts ...client.CallOption) (*BroadcastRsp, error) {
+	req := c.c.NewRequest(c.name, "AP.Broadcast", in)
+	out := new(BroadcastRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -76,12 +89,14 @@ func (c *aPService) PushMsg(ctx context.Context, in *PushMsgReq, opts ...client.
 // Server API for AP service
 
 type APHandler interface {
-	PushMsg(context.Context, *PushMsgReq, *PushMsgRsp) error
+	Unicast(context.Context, *UnicastReq, *UnicastRsp) error
+	Broadcast(context.Context, *BroadcastReq, *BroadcastRsp) error
 }
 
 func RegisterAPHandler(s server.Server, hdlr APHandler, opts ...server.HandlerOption) error {
 	type aP interface {
-		PushMsg(ctx context.Context, in *PushMsgReq, out *PushMsgRsp) error
+		Unicast(ctx context.Context, in *UnicastReq, out *UnicastRsp) error
+		Broadcast(ctx context.Context, in *BroadcastReq, out *BroadcastRsp) error
 	}
 	type AP struct {
 		aP
@@ -94,6 +109,10 @@ type aPHandler struct {
 	APHandler
 }
 
-func (h *aPHandler) PushMsg(ctx context.Context, in *PushMsgReq, out *PushMsgRsp) error {
-	return h.APHandler.PushMsg(ctx, in, out)
+func (h *aPHandler) Unicast(ctx context.Context, in *UnicastReq, out *UnicastRsp) error {
+	return h.APHandler.Unicast(ctx, in, out)
+}
+
+func (h *aPHandler) Broadcast(ctx context.Context, in *BroadcastReq, out *BroadcastRsp) error {
+	return h.APHandler.Broadcast(ctx, in, out)
 }

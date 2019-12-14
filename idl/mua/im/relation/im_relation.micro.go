@@ -35,6 +35,8 @@ It has these top-level messages:
 	UpgradeGroupRsp
 	GetGroupReq
 	GetGroupRsp
+	ListGroupMemberIDReq
+	ListGroupMemberIDRsp
 */
 package relation
 
@@ -75,6 +77,7 @@ type RelationService interface {
 	ListPersonalRelation(ctx context.Context, in *ListPersonalRelationReq, opts ...client.CallOption) (*ListPersonalRelationRsp, error)
 	CreateGroup(ctx context.Context, in *CreateGroupReq, opts ...client.CallOption) (*CreateGroupRsp, error)
 	GetGroup(ctx context.Context, in *GetGroupReq, opts ...client.CallOption) (*GetGroupRsp, error)
+	ListGroupMemberID(ctx context.Context, in *ListGroupMemberIDReq, opts ...client.CallOption) (*ListGroupMemberIDRsp, error)
 	ChangeGroupInfo(ctx context.Context, in *ChangeGroupInfoReq, opts ...client.CallOption) (*ChangeGroupInfoRsp, error)
 	UpgradeGroup(ctx context.Context, in *UpgradeGroupReq, opts ...client.CallOption) (*UpgradeGroupRsp, error)
 	JoinGroup(ctx context.Context, in *JoinGroupReq, opts ...client.CallOption) (*JoinGroupRsp, error)
@@ -179,6 +182,16 @@ func (c *relationService) GetGroup(ctx context.Context, in *GetGroupReq, opts ..
 	return out, nil
 }
 
+func (c *relationService) ListGroupMemberID(ctx context.Context, in *ListGroupMemberIDReq, opts ...client.CallOption) (*ListGroupMemberIDRsp, error) {
+	req := c.c.NewRequest(c.name, "Relation.ListGroupMemberID", in)
+	out := new(ListGroupMemberIDRsp)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *relationService) ChangeGroupInfo(ctx context.Context, in *ChangeGroupInfoReq, opts ...client.CallOption) (*ChangeGroupInfoRsp, error) {
 	req := c.c.NewRequest(c.name, "Relation.ChangeGroupInfo", in)
 	out := new(ChangeGroupInfoRsp)
@@ -230,6 +243,7 @@ type RelationHandler interface {
 	ListPersonalRelation(context.Context, *ListPersonalRelationReq, *ListPersonalRelationRsp) error
 	CreateGroup(context.Context, *CreateGroupReq, *CreateGroupRsp) error
 	GetGroup(context.Context, *GetGroupReq, *GetGroupRsp) error
+	ListGroupMemberID(context.Context, *ListGroupMemberIDReq, *ListGroupMemberIDRsp) error
 	ChangeGroupInfo(context.Context, *ChangeGroupInfoReq, *ChangeGroupInfoRsp) error
 	UpgradeGroup(context.Context, *UpgradeGroupReq, *UpgradeGroupRsp) error
 	JoinGroup(context.Context, *JoinGroupReq, *JoinGroupRsp) error
@@ -246,6 +260,7 @@ func RegisterRelationHandler(s server.Server, hdlr RelationHandler, opts ...serv
 		ListPersonalRelation(ctx context.Context, in *ListPersonalRelationReq, out *ListPersonalRelationRsp) error
 		CreateGroup(ctx context.Context, in *CreateGroupReq, out *CreateGroupRsp) error
 		GetGroup(ctx context.Context, in *GetGroupReq, out *GetGroupRsp) error
+		ListGroupMemberID(ctx context.Context, in *ListGroupMemberIDReq, out *ListGroupMemberIDRsp) error
 		ChangeGroupInfo(ctx context.Context, in *ChangeGroupInfoReq, out *ChangeGroupInfoRsp) error
 		UpgradeGroup(ctx context.Context, in *UpgradeGroupReq, out *UpgradeGroupRsp) error
 		JoinGroup(ctx context.Context, in *JoinGroupReq, out *JoinGroupRsp) error
@@ -292,6 +307,10 @@ func (h *relationHandler) CreateGroup(ctx context.Context, in *CreateGroupReq, o
 
 func (h *relationHandler) GetGroup(ctx context.Context, in *GetGroupReq, out *GetGroupRsp) error {
 	return h.RelationHandler.GetGroup(ctx, in, out)
+}
+
+func (h *relationHandler) ListGroupMemberID(ctx context.Context, in *ListGroupMemberIDReq, out *ListGroupMemberIDRsp) error {
+	return h.RelationHandler.ListGroupMemberID(ctx, in, out)
 }
 
 func (h *relationHandler) ChangeGroupInfo(ctx context.Context, in *ChangeGroupInfoReq, out *ChangeGroupInfoRsp) error {

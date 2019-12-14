@@ -72,6 +72,7 @@ func buildContainer() *dig.Container {
 	mustSccProvider(container, gateway.NewSessionClient)
 	mustSccProvider(container, gateway.NewRelationClient)
 	mustSccProvider(container, util.NewObjectIDCli)
+	mustSccProvider(container, util.NewInboxIDClient)
 	//event handler
 	mustSccProvider(container, event.NewMsgHandler)
 	//service

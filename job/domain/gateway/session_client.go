@@ -6,5 +6,5 @@ import (
 
 type SessionClient interface {
 	ListSessionInfo(uid int64) (info []*valueobj.SessionInfo, err error)
-	BatchListSessionInfo([]int64) (map[int64][]*valueobj.SessionInfo, error)
+	BatchListSessionInfo([]int64) ([]*valueobj.SessionInfo, error)
 }

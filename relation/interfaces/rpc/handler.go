@@ -124,3 +124,18 @@ func (h *Handler) QuitGroup(ctx context.Context, req *relation.QuitGroupReq, rsp
 	err = h.appSvc.QuitGroup(req.UID, req.GroupID)
 	return
 }
+
+func (h *Handler)ListGroupMemberID(ctx context.Context, req *relation.ListGroupMemberIDReq, rsp *relation.ListGroupMemberIDRsp)(err error){
+	rets, total, err :=  h.appSvc.ListGroupMember(req.GroupID, req.Page,req.PageSize)
+	if err != nil{
+		return err
+	}
+
+	rsp.Total = int32(total)
+	for _, itr := range rets {
+
+		rsp.Uid = append(rsp.Uid,itr.SrcUID)
+	}
+
+	return
+}

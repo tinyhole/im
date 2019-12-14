@@ -53,15 +53,15 @@ func (t *tcpTransportSocket) Recv() *pack.ApPackage {
 	return nil
 }
 
-func (t *tcpTransportSocket) Send(intrepidPackage *pack.ApPackage) {
+func (t *tcpTransportSocket) Send(intrepidPackage *pack.ApPackage) error{
 	var (
 		err error
 	)
 	err = t.session.WritePkg(intrepidPackage, time.Second*5)
 	if err != nil {
 		t.session.Close()
-		return
 	}
+	return err
 }
 
 func (t *tcpTransportSocket) Close() error {

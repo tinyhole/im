@@ -11,7 +11,7 @@ var (
 	MsgNotifyConv = msgNotifyConv{}
 )
 
-func (m msgNotifyConv) DO2DTO(src *valueobj.MsgNotify) *job.MsgNotify {
+func (m msgNotifyConv) DO2DTO(src *valueobj.Notify) *job.MsgNotify {
 	if src == nil {
 		return nil
 	}

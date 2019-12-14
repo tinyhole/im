@@ -20,7 +20,7 @@ func (n *NotifyObserver) Call(cli Client, data []byte) {
 	if err != nil {
 		return
 	}
-	rsp, err := Call("mua.im.job", "Job.PullMsg", pbReq)
+	rsp, err := cli.Call("mua.im.job", "Job.PullMsg", pbReq)
 	if err != nil {
 		fmt.Printf("cli.Call error [%v]\n", err)
 	}

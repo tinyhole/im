@@ -1,6 +1,8 @@
 package valueobj
 
-type MsgNotify struct {
-	InboxID int64
+
+
+type Notify struct {
+	InboxID string
 	Seq     int64
 }

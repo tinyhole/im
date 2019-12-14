@@ -38,7 +38,7 @@ func (s *sessionClient) ListSessionInfo(uid int64) ([]*valueobj.SessionInfo, err
 	return objconv.SessionInfoConv.SliceDTO2DO(rsp.Infos), nil
 }
 
-func (s *sessionClient) BatchListSessionInfo(uids []int64) (ret map[int64][]*valueobj.SessionInfo, err error) {
+func (s *sessionClient) BatchListSessionInfo(uids []int64) (rets []*valueobj.SessionInfo, err error) {
 	req := &logic.BatchListSessionInfoReq{
 		Uids: uids,
 	}
@@ -46,15 +46,6 @@ func (s *sessionClient) BatchListSessionInfo(uids []int64) (ret map[int64][]*val
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	rets := objconv.SessionInfoConv.SliceDTO2DO(rsp.Infos)
-	retMap := make(map[int64][]*valueobj.SessionInfo)
-	for _, itr := range rets {
-		if v, ok := retMap[itr.Uid]; ok {
-			v = append(v, itr)
-		} else {
-			retMap[itr.Uid] = []*valueobj.SessionInfo{itr}
-		}
-	}
-
-	return retMap, nil
+	rets = objconv.SessionInfoConv.SliceDTO2DO(rsp.Infos)
+	return
 }

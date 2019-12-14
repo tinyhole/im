@@ -25,7 +25,7 @@ func NewAppService(svc *service.JobService,
 	}
 }
 
-func (a *AppService) PullMsg(inboxID int64, seq int64) (msg *entity.Message, err error) {
+func (a *AppService) PullMsg(inboxID string, seq int64) (msg *entity.Message, err error) {
 	msg, err = a.msgRepo.Get(inboxID, seq)
 	if err != nil {
 		a.log.Errorf("Get failed [%v]", err)
@@ -34,9 +34,14 @@ func (a *AppService) PullMsg(inboxID int64, seq int64) (msg *entity.Message, err
 	return msg, err
 }
 
-func (a *AppService) SyncPrivateInboxMsg(uid int64, seq int64) (msg []*entity.Message, err error) {
+func (a *AppService) SyncPrivateInboxMsg(uid int64, seq int64, page, pageSize int32) (rets []*entity.Message, total int,err error) {
+	rets, total, err = a.jobSvc.SyncPrivateInboxMsg(uid, seq, page, pageSize)
+	if err != nil{
+		a.log.Errorf("jobSvc.SyncPrivateInboxMsg failed [%v]",err)
+		err = status.Error(codes.Internal,"sync private inbox failed")
+	}
 
-	return nil, nil
+	return
 }
 
 func (a *AppService) SyncPublicInboxMsg(uid int64) (msg []*entity.Message, err error) {

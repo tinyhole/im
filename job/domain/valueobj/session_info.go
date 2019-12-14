@@ -14,6 +14,4 @@ type SessionInfo struct {
 	Uid        int64
 	Fid        int64
 	ApID       int32
-	ApName     string
-	DeviceType int32
 }

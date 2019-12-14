@@ -3,7 +3,6 @@ package gateway
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/proto"
 	"github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/client/selector"
 	"github.com/micro/go-micro/registry"
@@ -12,9 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tinyhole/im/idl/mua/im/ap"
 	"github.com/tinyhole/im/job/domain/gateway"
-	"github.com/tinyhole/im/job/domain/valueobj"
 	"github.com/tinyhole/im/job/infrastructure/config"
-	"github.com/tinyhole/im/job/interfaces/objconv"
 )
 
 type apClient struct {
@@ -31,22 +28,31 @@ func NewApClient(conf *config.BaseConfig) gateway.ApClient {
 	}
 }
 
-func (a *apClient) PushMsg(apID int32, fid int64, msg *valueobj.MsgNotify) error {
-	dtMsg := objconv.MsgNotifyConv.DO2DTO(msg)
-	pbMsg, err := proto.Marshal(dtMsg)
+func (a *apClient) Unicast(apID int32, fid int64, data []byte) (err error) {
+	req := &ap.UnicastReq{
+		Fid:        fid,
+		SrvName:    "mua.im.job",
+		Endpoint: "Job.PushMsg",
+		Data:       data,
+	}
+	_, err = a.apSvc.Unicast(context.Background(), req,
+		client.WithSelectOption(selector.WithFilter(a.FilterID(fmt.Sprintf("mua.im.ap-%d", apID)))))
 	if err != nil {
 		return errors.WithStack(err)
 	}
+	return nil
+}
 
-	req := &ap.PushMsgReq{
-		Fid:        fid,
-		SrvName:    "mua.im.job",
-		MethodName: "Job.PushMsg",
-		Data:       pbMsg,
+func (a *apClient)Broadcast(apID int32, fids []int64, data []byte)(err error){
+	req := &ap.BroadcastReq{
+		Fids:                 fids,
+		SrvName:              "mua.im.job",
+		Endpoint:             "Job.PushMsg",
+		Data:                 data,
 	}
-	_, err = a.apSvc.PushMsg(context.Background(), req,
-		client.WithSelectOption(selector.WithFilter(a.FilterID(fmt.Sprintf("mua.im.ap-%d", apID)))))
-	if err != nil {
+	_, err = a.apSvc.Broadcast(context.Background(), req,
+	client.WithSelectOption(selector.WithFilter(a.FilterID(fmt.Sprintf("mua.im.ap-%d", apID)))))
+	if err != nil{
 		return errors.WithStack(err)
 	}
 	return nil
