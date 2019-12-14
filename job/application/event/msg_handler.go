@@ -1,6 +1,7 @@
 package event
 
 import (
+	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
 	"github.com/tinyhole/im/idl/mua/im"
@@ -20,10 +21,14 @@ type MsgHandler struct {
 }
 
 func NewMsgHandler(svc *service.JobService,
-	log logger.Logger) *MsgHandler {
+	log logger.Logger,
+	repo repository.Inbox,
+	notifyClient gateway.ApClient) *MsgHandler {
 	return &MsgHandler{
 		svc: svc,
 		log: log,
+		repo:repo,
+		notifyClient:notifyClient,
 	}
 }
 
@@ -36,12 +41,15 @@ func (m *MsgHandler) HandleMsg(data []byte) (err error) {
 		if errors.Cause(err) == service.ErrProcessMsgFailed{
 			return err
 		}
+		return nil
 	}
 	for _, itr := range rets{
 		err = m.repo.Save(itr)
 	}
-
 	for _, itr := range notifies {
+		if itr == nil{
+			fmt.Println("=======")
+		}
 		pbNotify := objconv.MsgNotifyConv.DO2DTO(itr.Notify)
 		data ,_:= proto.Marshal(pbNotify)
 		for k,v := range itr.SessMap {

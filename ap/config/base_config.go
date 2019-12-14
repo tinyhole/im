@@ -10,6 +10,7 @@ type BaseConfig struct {
 	ConfigPath         string `yaml:"ConfigPath"`
 	RegistryCenterAddr string `yaml:"RegistryCenterAddr"`
 	SrvID              uint32 `yaml:"SrvID"`
+	SrvName            string `yaml:"SrvName"`
 }
 
 func NewBaseConfig() (*BaseConfig, error) {

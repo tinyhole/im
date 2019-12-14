@@ -6,26 +6,27 @@ import (
 	"time"
 )
 
+type SocketFunc func(socket Socket)
+type PackageFunc func(socket Socket,apPackage *pack.ApPackage)
+
 const (
 	CronPeriod = 6e9
 )
 
 type tcpTransportSocket struct {
 	session     getty.Session
-	msgChan     chan *pack.ApPackage
 	authState   bool
 	uid         int64
-	destroyFn   func(socket Socket)
-	heartbeatFn func(socket Socket)
+	destroyFn   SocketFunc
+	pkFn PackageFunc
 }
 
-func NewTcpTransportSocket(session getty.Session, destroyFn, heartbeat func(socket Socket)) getty.EventListener {
+func NewTcpTransportSocket(session getty.Session, destroyFn SocketFunc, pkFn PackageFunc) getty.EventListener {
 	return &tcpTransportSocket{
 		session:     session,
-		msgChan:     make(chan *pack.ApPackage, 1024),
 		authState:   false,
 		destroyFn:   destroyFn,
-		heartbeatFn: heartbeat,
+		pkFn:pkFn,
 	}
 }
 
@@ -46,10 +47,6 @@ func (t *tcpTransportSocket) UpdateAuthState(state bool) {
 }
 
 func (t *tcpTransportSocket) Recv() *pack.ApPackage {
-	pkg, ok := <-t.msgChan
-	if ok {
-		return pkg
-	}
 	return nil
 }
 
@@ -97,7 +94,6 @@ func (t *tcpTransportSocket) OnClose(session getty.Session) {
 	if t.destroyFn != nil {
 		t.destroyFn(t)
 	}
-	close(t.msgChan)
 	t.session.Close()
 }
 
@@ -111,18 +107,9 @@ func (t *tcpTransportSocket) OnMessage(session getty.Session, pkg interface{}) {
 	if !ok {
 		return
 	}
-
-	if pbPkg.Header.Request != nil {
-		if pbPkg.Header.Request.ServiceName == "ap" &&
-			pbPkg.Header.Request.Endpoint == "ping" {
-			if t.heartbeatFn != nil {
-				t.heartbeatFn(t)
-			}
-			return
-		}
+	if t.pkFn != nil{
+		t.pkFn(t,pbPkg)
 	}
-
-	t.msgChan <- pbPkg
 }
 
 func (t *tcpTransportSocket) OnCron(session getty.Session) {
@@ -132,8 +119,8 @@ func (t *tcpTransportSocket) OnCron(session getty.Session) {
 	req := &pack.ApPackage{
 		Header: &pack.Header{
 			Request: &pack.RequestMeta{
-				ServiceName: "ap",
-				Endpoint:    "pong",
+				ServiceName: "mua.im.ap",
+				Endpoint:    "AP.pong",
 				CallType:    pack.CallType_Push,
 			},
 			Seq: 0,

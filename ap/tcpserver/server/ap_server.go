@@ -45,7 +45,7 @@ func (a *apServer) Start() error {
 		return errors.Wrap(err, "transport.Listen failed")
 	}
 
-	listener.Accept(a.SetUpCon, a.DestroyCon, a.ConHeartbeat)
+	listener.Accept(a.DestroyCon, a.ProcessMsg)
 	a.listener = listener
 	return nil
 }
@@ -54,36 +54,6 @@ func (a *apServer) Stop() error {
 	a.listener.Close()
 	a.cancelFn()
 	return nil
-}
-
-func (a *apServer) SetUpCon(socket transport.Socket) {
-	go func(ctx context.Context, socket transport.Socket) {
-		defer func() {
-			if r := recover(); r != nil {
-			}
-		}()
-		var (
-			err error
-		)
-		for {
-			select {
-			case <-ctx.Done():
-				socket.Close()
-			default:
-				msg := socket.Recv()
-				if msg == nil {
-					return
-				}
-				err = a.ProcessMsg(socket, msg)
-				if err != nil {
-					if err == ErrAuthFailed {
-						socket.Close()
-						return
-					}
-				}
-			}
-		}
-	}(a.ctx, socket)
 }
 
 func (a *apServer) DestroyCon(socket transport.Socket) {
@@ -98,6 +68,26 @@ func (a *apServer) ConHeartbeat(socket transport.Socket) {
 	}
 }
 
+func (a *apServer)authSocket(socket transport.Socket, header *pack.Header)(err error){
+	//1.身份信息
+	uid := header.Auth.Uid
+	token := header.Auth.Token
+	//2.认证
+	if a.opts.authClient != nil {
+		fid := a.GenerateFid(socket.ID())
+		err = a.opts.authClient.SignIn(uid, fid, int32(a.opts.SrvID), int32(header.Device.Type),
+			"mua.im.ap", token, socket.Remote())
+		if err == nil {
+			socket.UpdateAuthState(true)
+			socket.SetUID(uid)
+			bucket.DefaultSocketBucket.Add(fid, socket)
+		} else {
+			return ErrAuthFailed
+		}
+	}
+	return nil
+}
+
 const (
 	CallTypeUnknown = 0
 	Sync            = 1
@@ -105,34 +95,33 @@ const (
 	Push            = 3
 )
 
-func (a *apServer) ProcessMsg(socket transport.Socket, reqPack *pack.ApPackage) error {
+func (a *apServer) ProcessMsg(socket transport.Socket, reqPack *pack.ApPackage) {
+	defer func() {
+		if r := recover(); r != nil{
+			a.log.Errorf("process msg failed [%v]", r)
+		}
+	}()
+
 	var (
 		err    error
 		reqTmp *Message
 		rspTmp *Message
 	)
 	if socket.GetAuthState() == false {
-		//1.身份信息
-		uid := reqPack.Header.Auth.Uid
-		token := reqPack.Header.Auth.Token
-		//2.认证
-		if a.opts.authClient != nil {
-			fid := a.GenerateFid(socket.ID())
-			err = a.opts.authClient.SignIn(uid, fid, int32(a.opts.SrvID), int32(reqPack.Header.Device.Type),
-				"mua.im.ap", token, socket.Remote())
-			if err == nil {
-				socket.UpdateAuthState(true)
-				socket.SetUID(uid)
-				bucket.DefaultSocketBucket.Add(fid, socket)
-			} else {
-				//3.认证后处理
-				socket.Close()
-				return ErrAuthFailed
-			}
-		} else {
+		err = a.authSocket(socket,reqPack.Header)
+		if err != nil{
+			a.log.Warnf("socket auth failed [%v]",socket.Remote())
+			socket.Close()
 		}
+
 	}
 	if reqPack.Header.Request != nil {
+		if reqPack.Header.Request.ServiceName == "mua.im.ap"  &&
+			reqPack.Header.Request.Endpoint == "AP.Ping"{
+			a.ConHeartbeat(socket)
+			return
+		}
+
 		if reqPack.Body != nil {
 			reqTmp = NewMessage(reqPack.Body)
 		}
@@ -166,7 +155,7 @@ func (a *apServer) ProcessMsg(socket transport.Socket, reqPack *pack.ApPackage) 
 		}
 	}
 
-	return nil
+	return
 }
 
 func (a apServer) GenerateFid(id uint32) int64 {

@@ -124,7 +124,7 @@ func (c *client) Init(uid int64, token string) {
 	c.uid = uid
 	c.token = token
 	c.con = getty.NewTCPClient(getty.WithServerAddress("127.0.0.1:8080"), getty.WithConnectionNumber(1))
-	socket := &tcpTransportSocket{session: nil, client: c}
+	socket := &tcpTransportSocket{session: nil, client: c,uid:uid,token:token}
 	c.con.RunEventLoop(func(session getty.Session) error {
 		var (
 			ok      bool
@@ -185,6 +185,8 @@ func (t *tcpTransport) Write(session getty.Session, pkg interface{}) ([]byte, er
 type tcpTransportSocket struct {
 	session getty.Session
 	client  *client
+	uid int64
+	token string
 }
 
 func (t *tcpTransportSocket) OnOpen(session getty.Session) error {
@@ -212,14 +214,14 @@ func (t *tcpTransportSocket) OnMessage(session getty.Session, pkg interface{}) {
 	}
 
 	if pbPkg.Header.Request != nil {
-		if pbPkg.Header.Request.ServiceName == "ap" &&
-			pbPkg.Header.Request.Endpoint == "ping" {
+		if pbPkg.Header.Request.ServiceName == "mua.im.ap" &&
+			pbPkg.Header.Request.Endpoint == "AP.ping" {
 			fmt.Println("ping")
 			return
 		}
 
-		if pbPkg.Header.Request.ServiceName == "ap" &&
-			pbPkg.Header.Request.Endpoint == "pong" {
+		if pbPkg.Header.Request.ServiceName == "mua.im.ap" &&
+			pbPkg.Header.Request.Endpoint == "AP.pong" {
 			fmt.Println("pong")
 			return
 		}
@@ -247,9 +249,17 @@ func (t *tcpTransportSocket) OnCron(session getty.Session) {
 	req := &pack.ApPackage{
 		Header: &pack.Header{
 			Request: &pack.RequestMeta{
-				ServiceName: "ap",
-				Endpoint:    "ping",
+				ServiceName: "mua.im.ap",
+				Endpoint:    "AP.Ping",
 				CallType:    pack.CallType_Push,
+			},
+			Auth: &pack.AuthInfo{
+				Uid:   t.uid,
+				Token: t.token,
+			},
+			Device: &pack.Device{
+				Guid: "111",
+				Type: 1,
 			},
 			Seq: 0,
 		},

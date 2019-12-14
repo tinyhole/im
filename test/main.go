@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gogo/protobuf/proto"
+	"github.com/google/uuid"
 	"github.com/tinyhole/im/idl/mua/im"
 	"github.com/tinyhole/im/idl/mua/im/logic"
 	"os"
@@ -19,8 +20,17 @@ func main() {
 	tmpUid, _ := strconv.Atoi(os.Args[1])
 	uid := int64(tmpUid)
 	cli.Init(int64(uid), "")
+	ob := NotifyObserver{}
+	cli.AddOB("mua.im.job", "Job.PushMsg", &ob)
+	if uid == 1{
+		sendMsg(1)
+	}
+	wait()
+}
 
+func sendMsg(uid int64){
 	msg := im.Msg{
+		MsgID:    uuid.New().String(),
 		SrcID:       uid,
 		DstID:       2,
 		ContentType: im.ContentType_ContentTypeText,
@@ -37,9 +47,6 @@ func main() {
 		fmt.Printf("call Logic.PushMsg failed [%v]", err.Error())
 	}
 
-	ob := NotifyObserver{}
-	cli.AddOB("mua.im.job", "Job.PushMsg", &ob)
-	wait()
 }
 
 func wait() {

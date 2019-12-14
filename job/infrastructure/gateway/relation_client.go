@@ -39,12 +39,12 @@ func (r *relationClient) GetGroupType(groupID int64) (int32, error) {
 
 
 func (r *relationClient)ListGroupMember(groupID int64,page, pageSize int32)(rets []int64,total int32, err error){
-	req := &relation.ListGroupMembersReq{
+	req := &relation.ListGroupMemberIDReq{
 		GroupID:              groupID,
 		Page:                 page,
 		PageSize:             pageSize,
 	}
-	rsp, err := r.svc.ListGroupMembers(context.Background(), req)
+	rsp, err := r.svc.ListGroupMemberID(context.Background(), req)
 	if err != nil {
 		err = errors.WithStack(err)
 		return

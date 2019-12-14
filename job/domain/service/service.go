@@ -87,7 +87,9 @@ func (j *JobService)diffuseWrite(msg *entity.Message)(rets []*entity.Message,
 			j.fillMessage(dstMsg)
 			rets = append(rets, dstMsg)
 			notify := j.generatePersonalNotify(itr, dstMsg)
-			notifies = append(notifies, notify)
+			if notify != nil{
+				notifies = append(notifies, notify)
+			}
 		}
 
 		if page * pageSize >= total{
@@ -154,7 +156,14 @@ func (j *JobService) privateChat(msg *entity.Message)(rets []*entity.Message,not
 	rets = append(rets,senderMsg,receiverMsg)
 	senderNotify := j.generatePersonalNotify(msg.SrcID, senderMsg)
 	receiverNotify := j.generatePersonalNotify(msg.DstID, receiverMsg)
-	notifies = append(notifies, senderNotify, receiverNotify)
+	if senderNotify != nil{
+		notifies = append(notifies, senderNotify)
+	}
+
+	if receiverNotify != nil{
+
+		notifies = append(notifies,receiverNotify)
+	}
 	return
 }
 

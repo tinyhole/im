@@ -3,6 +3,7 @@ package transport
 import (
 	"fmt"
 	"github.com/dubbogo/getty"
+	gxsync "github.com/dubbogo/gost/sync"
 	"github.com/pkg/errors"
 	"github.com/tinyhole/im/ap/logger"
 	"github.com/tinyhole/im/ap/tcpserver/protocol/pack"
@@ -51,9 +52,10 @@ func (t *tcpTransport) Write(session getty.Session, pkg interface{}) ([]byte, er
 type tcpTransportListener struct {
 	l          getty.Server
 	tTransport *tcpTransport
+	taskPool *gxsync.TaskPool
 }
 
-func (t *tcpTransportListener) Accept(setUp, destroy, heartbeat func(socket Socket)) error {
+func (t *tcpTransportListener) Accept(destroy func(socket Socket), pkFn func(socket Socket,pk *pack.ApPackage)) error {
 	go t.l.RunEventLoop(func(session getty.Session) error {
 
 		var (
@@ -78,12 +80,11 @@ func (t *tcpTransportListener) Accept(setUp, destroy, heartbeat func(socket Sock
 		session.SetWriteTimeout(time.Second * 5)
 		session.SetCronPeriod(int(CronPeriod) / 1e6) //6 second
 		session.SetWaitTime(time.Second * 7)
-		//session.SetTaskPool(t.taskPool)
+		session.SetTaskPool(t.taskPool)
 
 		session.SetPkgHandler(t.tTransport)
-		eventListener := NewTcpTransportSocket(session, destroy, heartbeat)
+		eventListener := NewTcpTransportSocket(session, destroy, pkFn)
 		session.SetEventListener(eventListener)
-		setUp(eventListener.(*tcpTransportSocket))
 		return nil
 	})
 	return nil
@@ -109,6 +110,7 @@ func (t *tcpTransport) Listen(addr string, opts ...ListenOption) (Listener, erro
 	listener := &tcpTransportListener{
 		l:          getty.NewTCPServer(getty.WithLocalAddress(addr)),
 		tTransport: t,
+		taskPool:gxsync.NewTaskPool(gxsync.WithTaskPoolTaskPoolSize(1024)),
 	}
 	return listener, nil
 }

@@ -25,5 +25,5 @@ type Socket interface {
 type Listener interface {
 	Addr() string
 	Close() error
-	Accept(setUp, destroy, heartbeat func(socket Socket)) error
+	Accept(destroy func(socket Socket), pkFn func(socket Socket, pk *pack.ApPackage)) error
 }
