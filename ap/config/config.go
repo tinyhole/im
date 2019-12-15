@@ -17,7 +17,7 @@ func NewConfig(baseConf *BaseConfig) (*Config, error) {
 	var (
 		err error
 	)
-	fmt.Printf("%v", baseConf)
+	//fmt.Printf("%v", baseConf)
 	etcdSource := etcd.NewSource(etcd.WithAddress(baseConf.ConfigCenterAddr),
 		etcd.WithPrefix(baseConf.ConfigPath),
 		etcd.StripPrefix(true),

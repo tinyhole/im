@@ -37,12 +37,11 @@ func (r *relationClient) GetGroupType(groupID int64) (int32, error) {
 	return int32(rsp.Info.Type), nil
 }
 
-
-func (r *relationClient)ListGroupMember(groupID int64,page, pageSize int32)(rets []int64,total int32, err error){
+func (r *relationClient) ListGroupMember(groupID int64, page, pageSize int32) (rets []int64, total int32, err error) {
 	req := &relation.ListGroupMemberIDReq{
-		GroupID:              groupID,
-		Page:                 page,
-		PageSize:             pageSize,
+		GroupID:  groupID,
+		Page:     page,
+		PageSize: pageSize,
 	}
 	rsp, err := r.svc.ListGroupMemberID(context.Background(), req)
 	if err != nil {

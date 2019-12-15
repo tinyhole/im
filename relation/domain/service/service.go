@@ -24,10 +24,10 @@ type RelationService interface {
 }
 
 type relationService struct {
-	idCli gateway.SequenceCli
+	idCli gateway.SequenceClient
 }
 
-func NewRelationService(idCli gateway.SequenceCli) RelationService {
+func NewRelationService(idCli gateway.SequenceClient) RelationService {
 	return &relationService{
 		idCli: idCli,
 	}
@@ -73,7 +73,7 @@ func (r *relationService) CreateGroup(srcUID int64, groupName, sequenceName stri
 		id int64
 	)
 	group = entity.NewGroup(groupName)
-	id, err = r.idCli.GetSeq(sequenceName)
+	id, err = r.idCli.GenerateGroupID(sequenceName)
 	if err != nil {
 		err = errors.Wrap(err, "idCli.GetSeq failed")
 		return

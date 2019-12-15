@@ -34,11 +34,11 @@ func (a *AppService) PullMsg(inboxID string, seq int64) (msg *entity.Message, er
 	return msg, err
 }
 
-func (a *AppService) SyncPrivateInboxMsg(uid int64, seq int64, page, pageSize int32) (rets []*entity.Message, total int,err error) {
+func (a *AppService) SyncPrivateInboxMsg(uid int64, seq int64, page, pageSize int32) (rets []*entity.Message, total int, err error) {
 	rets, total, err = a.jobSvc.SyncPrivateInboxMsg(uid, seq, page, pageSize)
-	if err != nil{
-		a.log.Errorf("jobSvc.SyncPrivateInboxMsg failed [%v]",err)
-		err = status.Error(codes.Internal,"sync private inbox failed")
+	if err != nil {
+		a.log.Errorf("jobSvc.SyncPrivateInboxMsg failed [%v]", err)
+		err = status.Error(codes.Internal, "sync private inbox failed")
 	}
 
 	return

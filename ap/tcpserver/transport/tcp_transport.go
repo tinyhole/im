@@ -52,10 +52,10 @@ func (t *tcpTransport) Write(session getty.Session, pkg interface{}) ([]byte, er
 type tcpTransportListener struct {
 	l          getty.Server
 	tTransport *tcpTransport
-	taskPool *gxsync.TaskPool
+	taskPool   *gxsync.TaskPool
 }
 
-func (t *tcpTransportListener) Accept(destroy func(socket Socket), pkFn func(socket Socket,pk *pack.ApPackage)) error {
+func (t *tcpTransportListener) Accept(destroy func(socket Socket), pkFn func(socket Socket, pk *pack.ApPackage)) error {
 	go t.l.RunEventLoop(func(session getty.Session) error {
 
 		var (
@@ -110,7 +110,7 @@ func (t *tcpTransport) Listen(addr string, opts ...ListenOption) (Listener, erro
 	listener := &tcpTransportListener{
 		l:          getty.NewTCPServer(getty.WithLocalAddress(addr)),
 		tTransport: t,
-		taskPool:gxsync.NewTaskPool(gxsync.WithTaskPoolTaskPoolSize(1024)),
+		taskPool:   gxsync.NewTaskPool(gxsync.WithTaskPoolTaskPoolSize(1024)),
 	}
 	return listener, nil
 }

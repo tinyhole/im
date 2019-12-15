@@ -1,10 +1,10 @@
 package nsq
 
 import (
-	"github.com/youzan/go-nsq"
 	"github.com/pkg/errors"
 	"github.com/tinyhole/im/job/application/event"
 	"github.com/tinyhole/im/job/infrastructure/logger"
+	"github.com/youzan/go-nsq"
 	"time"
 )
 

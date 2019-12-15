@@ -124,7 +124,7 @@ func (c *client) Init(uid int64, token string) {
 	c.uid = uid
 	c.token = token
 	c.con = getty.NewTCPClient(getty.WithServerAddress("127.0.0.1:8080"), getty.WithConnectionNumber(1))
-	socket := &tcpTransportSocket{session: nil, client: c,uid:uid,token:token}
+	socket := &tcpTransportSocket{session: nil, client: c, uid: uid, token: token}
 	c.con.RunEventLoop(func(session getty.Session) error {
 		var (
 			ok      bool
@@ -185,8 +185,8 @@ func (t *tcpTransport) Write(session getty.Session, pkg interface{}) ([]byte, er
 type tcpTransportSocket struct {
 	session getty.Session
 	client  *client
-	uid int64
-	token string
+	uid     int64
+	token   string
 }
 
 func (t *tcpTransportSocket) OnOpen(session getty.Session) error {

@@ -68,7 +68,7 @@ func (a *apServer) ConHeartbeat(socket transport.Socket) {
 	}
 }
 
-func (a *apServer)authSocket(socket transport.Socket, header *pack.Header)(err error){
+func (a *apServer) authSocket(socket transport.Socket, header *pack.Header) (err error) {
 	//1.身份信息
 	uid := header.Auth.Uid
 	token := header.Auth.Token
@@ -97,7 +97,7 @@ const (
 
 func (a *apServer) ProcessMsg(socket transport.Socket, reqPack *pack.ApPackage) {
 	defer func() {
-		if r := recover(); r != nil{
+		if r := recover(); r != nil {
 			a.log.Errorf("process msg failed [%v]", r)
 		}
 	}()
@@ -108,16 +108,16 @@ func (a *apServer) ProcessMsg(socket transport.Socket, reqPack *pack.ApPackage) 
 		rspTmp *Message
 	)
 	if socket.GetAuthState() == false {
-		err = a.authSocket(socket,reqPack.Header)
-		if err != nil{
-			a.log.Warnf("socket auth failed [%v]",socket.Remote())
+		err = a.authSocket(socket, reqPack.Header)
+		if err != nil {
+			a.log.Warnf("socket auth failed [%v]", socket.Remote())
 			socket.Close()
 		}
 
 	}
 	if reqPack.Header.Request != nil {
-		if reqPack.Header.Request.ServiceName == "mua.im.ap"  &&
-			reqPack.Header.Request.Endpoint == "AP.Ping"{
+		if reqPack.Header.Request.ServiceName == "mua.im.ap" &&
+			reqPack.Header.Request.Endpoint == "AP.Ping" {
 			a.ConHeartbeat(socket)
 			return
 		}

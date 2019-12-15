@@ -22,15 +22,16 @@ func main() {
 	cli.Init(int64(uid), "")
 	ob := NotifyObserver{}
 	cli.AddOB("mua.im.job", "Job.PushMsg", &ob)
-	if uid == 1{
-		sendMsg(1)
+	if uid == 1 {
+		//sendMsg(1)
+		sendGroupMsg(1)
 	}
 	wait()
 }
 
-func sendMsg(uid int64){
+func sendMsg(uid int64) {
 	msg := im.Msg{
-		MsgID:    uuid.New().String(),
+		MsgID:       uuid.New().String(),
 		SrcID:       uid,
 		DstID:       2,
 		ContentType: im.ContentType_ContentTypeText,
@@ -47,6 +48,26 @@ func sendMsg(uid int64){
 		fmt.Printf("call Logic.PushMsg failed [%v]", err.Error())
 	}
 
+}
+
+func sendGroupMsg(uid int64) {
+	msg := im.Msg{
+		MsgID:       uuid.New().String(),
+		SrcID:       uid,
+		DstID:       0,
+		ContentType: im.ContentType_ContentTypeText,
+		Content:     "this is group message",
+		MsgType:     im.MsgType_MsgTypeGroup,
+	}
+
+	req := logic.PushMsgReq{
+		Msg: &msg,
+	}
+	pbReq, _ := proto.Marshal(&req)
+	_, err := cli.Call("mua.im.logic", "Logic.PushMsg", pbReq)
+	if err != nil {
+		fmt.Printf("call Logic.PushMsg failed [%v]", err.Error())
+	}
 }
 
 func wait() {

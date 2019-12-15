@@ -30,10 +30,10 @@ func NewApClient(conf *config.BaseConfig) gateway.ApClient {
 
 func (a *apClient) Unicast(apID int32, fid int64, data []byte) (err error) {
 	req := &ap.UnicastReq{
-		Fid:        fid,
-		SrvName:    "mua.im.job",
+		Fid:      fid,
+		SrvName:  "mua.im.job",
 		Endpoint: "Job.PushMsg",
-		Data:       data,
+		Data:     data,
 	}
 	_, err = a.apSvc.Unicast(context.Background(), req,
 		client.WithSelectOption(selector.WithFilter(a.FilterID(fmt.Sprintf("mua.im.ap-%d", apID)))))
@@ -43,16 +43,16 @@ func (a *apClient) Unicast(apID int32, fid int64, data []byte) (err error) {
 	return nil
 }
 
-func (a *apClient)Broadcast(apID int32, fids []int64, data []byte)(err error){
+func (a *apClient) Broadcast(apID int32, fids []int64, data []byte) (err error) {
 	req := &ap.BroadcastReq{
-		Fids:                 fids,
-		SrvName:              "mua.im.job",
-		Endpoint:             "Job.PushMsg",
-		Data:                 data,
+		Fids:     fids,
+		SrvName:  "mua.im.job",
+		Endpoint: "Job.PushMsg",
+		Data:     data,
 	}
 	_, err = a.apSvc.Broadcast(context.Background(), req,
-	client.WithSelectOption(selector.WithFilter(a.FilterID(fmt.Sprintf("mua.im.ap-%d", apID)))))
-	if err != nil{
+		client.WithSelectOption(selector.WithFilter(a.FilterID(fmt.Sprintf("mua.im.ap-%d", apID)))))
+	if err != nil {
 		return errors.WithStack(err)
 	}
 	return nil

@@ -11,7 +11,7 @@ type Transport interface {
 
 type Socket interface {
 	Recv() *pack.ApPackage
-	Send(apPackage *pack.ApPackage)error
+	Send(apPackage *pack.ApPackage) error
 	Close() error
 	Local() string
 	Remote() string

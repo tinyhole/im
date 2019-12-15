@@ -9,7 +9,7 @@ import (
 )
 
 func NewRPCServer(conf *config.BaseConfig) micro.Service {
-	svc := micro.NewService(micro.Transport(tcp.NewTransport()), micro.Name("mua.im.logic"),
+	svc := micro.NewService(micro.Transport(tcp.NewTransport()), micro.Name(conf.SrvName),
 		micro.Registry(etcd.NewRegistry(registry.Addrs(conf.RegistryCenterAddr))))
 	return svc
 }

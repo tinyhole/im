@@ -11,7 +11,7 @@ package valueobj
 */
 
 type SessionInfo struct {
-	Uid        int64
-	Fid        int64
-	ApID       int32
+	Uid  int64
+	Fid  int64
+	ApID int32
 }

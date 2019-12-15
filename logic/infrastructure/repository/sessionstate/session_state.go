@@ -27,6 +27,7 @@ func (s *sessionStateRepo) prefixKey(uid int64) string {
 	return fmt.Sprintf("session|%d|*", uid)
 }
 
+//todo:优化访问
 func (s *sessionStateRepo) List(uid int64) ([]*valueobj.SessionInfo, error) {
 	var (
 		err    error
@@ -43,7 +44,6 @@ func (s *sessionStateRepo) List(uid int64) ([]*valueobj.SessionInfo, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	fmt.Printf("========>[%v]", reply)
 	keys, err = redis.Strings(reply, err)
 	args := []interface{}{}
 	for _, itr := range keys {

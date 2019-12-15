@@ -7,26 +7,26 @@ import (
 )
 
 type SocketFunc func(socket Socket)
-type PackageFunc func(socket Socket,apPackage *pack.ApPackage)
+type PackageFunc func(socket Socket, apPackage *pack.ApPackage)
 
 const (
 	CronPeriod = 6e9
 )
 
 type tcpTransportSocket struct {
-	session     getty.Session
-	authState   bool
-	uid         int64
-	destroyFn   SocketFunc
-	pkFn PackageFunc
+	session   getty.Session
+	authState bool
+	uid       int64
+	destroyFn SocketFunc
+	pkFn      PackageFunc
 }
 
 func NewTcpTransportSocket(session getty.Session, destroyFn SocketFunc, pkFn PackageFunc) getty.EventListener {
 	return &tcpTransportSocket{
-		session:     session,
-		authState:   false,
-		destroyFn:   destroyFn,
-		pkFn:pkFn,
+		session:   session,
+		authState: false,
+		destroyFn: destroyFn,
+		pkFn:      pkFn,
 	}
 }
 
@@ -50,7 +50,7 @@ func (t *tcpTransportSocket) Recv() *pack.ApPackage {
 	return nil
 }
 
-func (t *tcpTransportSocket) Send(intrepidPackage *pack.ApPackage) error{
+func (t *tcpTransportSocket) Send(intrepidPackage *pack.ApPackage) error {
 	var (
 		err error
 	)
@@ -107,8 +107,8 @@ func (t *tcpTransportSocket) OnMessage(session getty.Session, pkg interface{}) {
 	if !ok {
 		return
 	}
-	if t.pkFn != nil{
-		t.pkFn(t,pbPkg)
+	if t.pkFn != nil {
+		t.pkFn(t, pbPkg)
 	}
 }
 

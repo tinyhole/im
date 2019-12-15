@@ -2,6 +2,7 @@ package service
 
 import (
 	"container/list"
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/tinyhole/im/idl/mua/im"
 	"github.com/tinyhole/im/idl/mua/im/relation"
@@ -13,10 +14,10 @@ import (
 	"time"
 )
 
-
 var (
 	pageSize = int32(500)
 )
+
 type JobService struct {
 	relationClient gateway.RelationClient
 	sequenceClient gateway.SequenceClient
@@ -39,46 +40,47 @@ func NewJobService(
 	}
 }
 
-func (j *JobService) ProcessMsg(msg *entity.Message) (rets []*entity.Message, notifies []*valueobj.MessageNotify,err error) {
+func (j *JobService) ProcessMsg(msg *entity.Message) (rets []*entity.Message, notifies []*valueobj.MessageNotify, err error) {
 	//消息逻辑
 	msg.Time = time.Now().Unix()
-	switch msg.MsgType{
+	switch msg.MsgType {
 	case int32(im.MsgType_MsgTypePrivte):
 		rets, notifies, err = j.privateChat(msg)
 	case int32(im.MsgType_MsgTypeGroup):
 		rets, notifies, err = j.groupChat(msg)
 	default:
-		return nil,nil, ErrUnknownMsgType
+		return nil, nil, ErrUnknownMsgType
 	}
 
 	return
 
 }
 
-func (j *JobService) groupChat(msg *entity.Message)(rets []*entity.Message, notifies []*valueobj.MessageNotify, err error){
+func (j *JobService) groupChat(msg *entity.Message) (rets []*entity.Message, notifies []*valueobj.MessageNotify, err error) {
 	//拿群类型，决定是写扩散还是读扩散
 	groupType, err := j.relationClient.GetGroupType(msg.DstID)
 	//写扩散
-	if groupType != int32(relation.GroupType_Super){
+	if groupType != int32(relation.GroupType_Super) {
+		fmt.Println("diffuseWrite")
 		rets, notifies, err = j.diffuseWrite(msg)
-	}else{ //读扩散
-		rets, notifies,err = j.diffuseRead(msg)
+	} else { //读扩散
+		rets, notifies, err = j.diffuseRead(msg)
 	}
 	return
 }
 
-func (j *JobService)diffuseWrite(msg *entity.Message)(rets []*entity.Message,
-	notifies []*valueobj.MessageNotify, err error){
+func (j *JobService) diffuseWrite(msg *entity.Message) (rets []*entity.Message,
+	notifies []*valueobj.MessageNotify, err error) {
 	var (
-		page int32
+		page    int32
 		members []int64
-		total int32
+		total   int32
 	)
 	page = 1
 	for {
-		members, total, err = j.relationClient.ListGroupMember(msg.DstID,page, pageSize)
-		if err != nil{
-			err =errors.Wrapf(ErrProcessMsgFailed,"list group member failed [%v]",err.Error())
+		members, total, err = j.relationClient.ListGroupMember(msg.DstID, page, pageSize)
+		if err != nil {
+			err = errors.Wrapf(ErrProcessMsgFailed, "list group member failed [%v]", err.Error())
 			return
 		}
 		for _, itr := range members {
@@ -87,12 +89,12 @@ func (j *JobService)diffuseWrite(msg *entity.Message)(rets []*entity.Message,
 			j.fillMessage(dstMsg)
 			rets = append(rets, dstMsg)
 			notify := j.generatePersonalNotify(itr, dstMsg)
-			if notify != nil{
+			if notify != nil {
 				notifies = append(notifies, notify)
 			}
 		}
 
-		if page * pageSize >= total{
+		if page*pageSize >= total {
 			break
 		}
 	}
@@ -101,18 +103,18 @@ func (j *JobService)diffuseWrite(msg *entity.Message)(rets []*entity.Message,
 }
 
 //diffuseRead read 扩散
-func (j *JobService)diffuseRead(msg *entity.Message)(rets []*entity.Message,
-	notifies []*valueobj.MessageNotify, err error){
+func (j *JobService) diffuseRead(msg *entity.Message) (rets []*entity.Message,
+	notifies []*valueobj.MessageNotify, err error) {
 	var (
 		members []int64
-		total int32
+		total   int32
 	)
 	//填充消息
 	inboxID := j.inboxIDClient.GetGroupInboxID(msg.DstID)
 	msg.InboxID = inboxID
 	err = j.fillMessage(msg)
 	rets = append(rets, msg)
-	if err != nil{
+	if err != nil {
 		err = ErrProcessMsgFailed
 		return
 	}
@@ -124,20 +126,22 @@ func (j *JobService)diffuseRead(msg *entity.Message)(rets []*entity.Message,
 	for {
 		//生成消息通知
 		members, total, err = j.relationClient.ListGroupMember(msg.DstID, page, pageSize)
-		if err != nil{
+		if err != nil {
 			err = ErrGenerateNotifyFailed
 			return
 		}
-		notifies = append(notifies,j.generateGroupNotify(members,notify))
+		notifies = append(notifies, j.generateGroupNotify(members, notify))
 		//所有通知都生成完了
-		if pageSize * page >= total {
+		if pageSize*page >= total {
 			break
+		} else {
+			page++
 		}
 	}
 	return
 }
 
-func (j *JobService) privateChat(msg *entity.Message)(rets []*entity.Message,notifies []*valueobj.MessageNotify,err error)  {
+func (j *JobService) privateChat(msg *entity.Message) (rets []*entity.Message, notifies []*valueobj.MessageNotify, err error) {
 	//私聊写扩散
 	senderInboxID := j.inboxIDClient.GetPersonalInboxID(msg.SrcID)
 	senderMsg := msg
@@ -146,28 +150,28 @@ func (j *JobService) privateChat(msg *entity.Message)(rets []*entity.Message,not
 	receiverMsg := msg.CopyToInbox(receiverInboxID)
 
 	err = j.fillMessage(senderMsg)
-	if err != nil{
+	if err != nil {
 		return
 	}
 	err = j.fillMessage(receiverMsg)
-	if err != nil{
+	if err != nil {
 		return
 	}
-	rets = append(rets,senderMsg,receiverMsg)
+	rets = append(rets, senderMsg, receiverMsg)
 	senderNotify := j.generatePersonalNotify(msg.SrcID, senderMsg)
 	receiverNotify := j.generatePersonalNotify(msg.DstID, receiverMsg)
-	if senderNotify != nil{
+	if senderNotify != nil {
 		notifies = append(notifies, senderNotify)
 	}
 
-	if receiverNotify != nil{
+	if receiverNotify != nil {
 
-		notifies = append(notifies,receiverNotify)
+		notifies = append(notifies, receiverNotify)
 	}
 	return
 }
 
-func(j *JobService)fillMessage(msg *entity.Message)(error){
+func (j *JobService) fillMessage(msg *entity.Message) error {
 	seq, err := j.sequenceClient.GetPrivateSeq(msg.InboxID)
 	if err != nil {
 		return errors.Wrap(ErrProcessMsgFailed, "GetPrivateSeq failed")
@@ -176,24 +180,23 @@ func(j *JobService)fillMessage(msg *entity.Message)(error){
 	return nil
 }
 
-
 //generatePersonalNotify 生成个人通知
-func(j *JobService) generatePersonalNotify(uid int64,msg *entity.Message)*valueobj.MessageNotify {
+func (j *JobService) generatePersonalNotify(uid int64, msg *entity.Message) *valueobj.MessageNotify {
 	var (
 		sesMap map[int32]*list.List
 	)
 	//对会话按照APID分组
 	sesMap = make(map[int32]*list.List)
-	sess , err := j.sessionClient.ListSessionInfo(uid)
-	for _, itr := range sess{
-		if v, ok :=  sesMap[itr.ApID];ok{
+	sess, err := j.sessionClient.ListSessionInfo(uid)
+	for _, itr := range sess {
+		if v, ok := sesMap[itr.ApID]; ok {
 			v.PushBack(itr)
-		}else{
+		} else {
 			sesMap[itr.ApID] = list.New()
 			sesMap[itr.ApID].PushBack(itr)
 		}
 	}
-	if err != nil{
+	if err != nil {
 		return nil
 	}
 	return &valueobj.MessageNotify{
@@ -205,39 +208,38 @@ func(j *JobService) generatePersonalNotify(uid int64,msg *entity.Message)*valueo
 	}
 }
 
-
 //generateGroupNotify 生成群通知
-func (j *JobService)generateGroupNotify(uids []int64, notify *valueobj.Notify)*valueobj.MessageNotify{
+func (j *JobService) generateGroupNotify(uids []int64, notify *valueobj.Notify) *valueobj.MessageNotify {
 	var (
 		sessMap map[int32]*list.List
 	)
 	//对会话按照APID分组
 	sessMap = make(map[int32]*list.List)
-	sess,err := j.sessionClient.BatchListSessionInfo(uids)
-	for _, itr := range sess{
-		if v, ok :=  sessMap[itr.ApID];ok{
+	sess, err := j.sessionClient.BatchListSessionInfo(uids)
+	for _, itr := range sess {
+		if v, ok := sessMap[itr.ApID]; ok {
 			v.PushBack(itr)
-		}else{
+		} else {
 			sessMap[itr.ApID] = list.New()
 			sessMap[itr.ApID].PushBack(itr)
 		}
 	}
-	if err != nil{
+	if err != nil {
 		return nil
 	}
 	return &valueobj.MessageNotify{
 		SessMap: sessMap,
-		Notify: notify,
+		Notify:  notify,
 	}
 }
 
-func (j *JobService)SyncPrivateInboxMsg(uid int64, seq int64, page ,pageSize int32)([]*entity.Message,int,error){
+func (j *JobService) SyncPrivateInboxMsg(uid int64, seq int64, page, pageSize int32) ([]*entity.Message, int, error) {
 	inboxID := j.inboxIDClient.GetPersonalInboxID(uid)
 	end := time.Now()
 	start := time.Now().Add(-7 * time.Hour * 24)
-	rets, total, err :=j.repo.List(inboxID,seq, start.Unix(),end.Unix(),page,pageSize)
+	rets, total, err := j.repo.List(inboxID, seq, start.Unix(), end.Unix(), page, pageSize)
 
-	return rets,total,err
+	return rets, total, err
 }
 
 func (j *JobService) SyncPublicInboxMsg(uid int64) ([]*entity.Message, error) {

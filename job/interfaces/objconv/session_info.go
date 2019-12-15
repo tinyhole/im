@@ -16,9 +16,9 @@ func (s sessionInfoConv) DTO2DO(src *logic.SessionInfo) *valueobj.SessionInfo {
 		return nil
 	}
 	return &valueobj.SessionInfo{
-		Uid:        src.Uid,
-		Fid:        src.Fid,
-		ApID:       src.ApID,
+		Uid:  src.Uid,
+		Fid:  src.Fid,
+		ApID: src.ApID,
 	}
 }
 

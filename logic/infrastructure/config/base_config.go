@@ -8,6 +8,7 @@ type BaseConfig struct {
 	ConfigCenterAddr   string `yaml:"ConfigCenterAddr"`
 	ConfigPath         string `yaml:"ConfigPath"`
 	RegistryCenterAddr string `yaml:"RegistryCenterAddr"`
+	SrvName            string `yaml:"SrvName"`
 }
 
 func NewBaseConfig() (*BaseConfig, error) {

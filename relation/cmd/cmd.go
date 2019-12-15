@@ -9,6 +9,7 @@ import (
 	"github.com/tinyhole/im/relation/domain/service"
 	"github.com/tinyhole/im/relation/infrastructure/config"
 	"github.com/tinyhole/im/relation/infrastructure/driver/mongo"
+	"github.com/tinyhole/im/relation/infrastructure/gateway"
 	"github.com/tinyhole/im/relation/infrastructure/logger"
 	"github.com/tinyhole/im/relation/infrastructure/repository"
 	"github.com/tinyhole/im/relation/infrastructure/server"
@@ -66,6 +67,9 @@ func buildContainer() *dig.Container {
 	//logger
 	mustSccProvider(container, logger.NewLogger)
 
+	//gateway
+	mustSccProvider(container, gateway.NewSequenceClient)
+
 	//objconv
 	mustSccProvider(container, objconv.NewGroupConv)
 	mustSccProvider(container, objconv.NewGroupRelationConv)
@@ -84,7 +88,7 @@ func buildContainer() *dig.Container {
 
 func Run() {
 	container := buildContainer()
-	container.Invoke(func(microSvc micro.Service,
+	err := container.Invoke(func(microSvc micro.Service,
 		appService *application.AppService,
 		groupConv *objconv.GroupConv,
 		groupRelationConv *objconv.GroupRelationConv,
@@ -94,4 +98,7 @@ func Run() {
 			groupConv, groupRelationConv, personalRelationConv))
 		microSvc.Run()
 	})
+	if err != nil {
+		fmt.Printf("invoke error [%v]", err)
+	}
 }

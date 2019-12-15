@@ -294,11 +294,11 @@ func (a *AppService) UpgradeGroup(uid, groupID int64, typ int32) error {
 	}
 }
 
-func (a *AppService)ListGroupMember(gid int64, page,pageSize int32)(rets []*entity.GroupRelation, total int,err error){
+func (a *AppService) ListGroupMember(gid int64, page, pageSize int32) (rets []*entity.GroupRelation, total int, err error) {
 
 	rets, total, err = a.groupRelationRepo.ListMember(gid, page, pageSize)
-	if err != nil{
-		a.log.Errorf("list member failed [%v]",err)
+	if err != nil {
+		a.log.Errorf("list member failed [%v]", err)
 		err = status.Error(codes.Internal, "list member failed")
 	}
 	return

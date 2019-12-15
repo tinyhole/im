@@ -41,8 +41,8 @@ func (i *inboxRepo) Get(inboxID string, seq int64) (*entity.Message, error) {
 
 func (i *inboxRepo) Save(data *entity.Message) (err error) {
 	query := bson.M{
-		"msg_id":data.MsgID,
-		"inbox_id":data.InboxID,
+		"msg_id":   data.MsgID,
+		"inbox_id": data.InboxID,
 	}
 
 	update := bson.M{
@@ -62,20 +62,18 @@ func (i *inboxRepo) Save(data *entity.Message) (err error) {
 	return err
 }
 
-
-func (i *inboxRepo)List(inboxID string,seq, startTime, endTime int64,page, pageSize int32)(rets []*entity.Message,total int, err error){
+func (i *inboxRepo) List(inboxID string, seq, startTime, endTime int64, page, pageSize int32) (rets []*entity.Message, total int, err error) {
 	query := bson.M{
-		"inbox_id":inboxID,
-		"time":bson.M{
-			"$gte":startTime,
-			"$lte":endTime,
+		"inbox_id": inboxID,
+		"time": bson.M{
+			"$gte": startTime,
+			"$lte": endTime,
 		},
-		"seq":bson.M{
-				"$gt":seq,
+		"seq": bson.M{
+			"$gt": seq,
 		},
 	}
 
-	total,err = i.db.List(i.table,query,[]string{"+seq"},page,pageSize,&rets)
+	total, err = i.db.List(i.table, query, []string{"+seq"}, page, pageSize, &rets)
 	return
 }
-

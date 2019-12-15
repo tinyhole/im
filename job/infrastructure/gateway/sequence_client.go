@@ -39,7 +39,7 @@ func (s *sequenceClient) GetPrivateSeq(inboxID string) (int64, error) {
 
 func (s *sequenceClient) GetGroupSeq(inboxID string) (int64, error) {
 	req := &sequence.GetAutoIncrIDReq{
-		Key:inboxID,
+		Key: inboxID,
 	}
 
 	rsp, err := s.svc.GetAutoIncrID(context.Background(), req)

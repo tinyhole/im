@@ -8,7 +8,7 @@ const (
 
 type Message struct {
 	MsgID       string `bson:"msg_id"`
-	InboxID     string  `bson:"inbox_id"` //收件箱id
+	InboxID     string `bson:"inbox_id"` //收件箱id
 	SrcID       int64  `bson:"src_id"`
 	DstID       int64  `bson:"dst_id"`
 	MsgType     int32  `bson:"msg_type"` //消息类型，私聊，群聊
@@ -18,7 +18,7 @@ type Message struct {
 	ContentType int32  `bson:"content_type"` //内容类型
 }
 
-func (m *Message)CopyToInbox(inboxID string)*Message{
+func (m *Message) CopyToInbox(inboxID string) *Message {
 	return &Message{
 		MsgID:       m.MsgID,
 		InboxID:     inboxID,

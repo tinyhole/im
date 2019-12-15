@@ -92,6 +92,3 @@ func run() {
 		fmt.Printf("Invoke error [%v]", err)
 	}
 }
-
-
-

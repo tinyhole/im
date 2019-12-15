@@ -8,7 +8,7 @@ import (
 
 type Client interface {
 	Unicast(fid int64, service, endpoint string, data []byte) error
-	Broadcast(fids []int64, service, endpoint string, data []byte)error
+	Broadcast(fids []int64, service, endpoint string, data []byte) error
 }
 
 type client struct{}
@@ -37,7 +37,7 @@ func (c *client) Unicast(fid int64, service, endpoint string, data []byte) error
 	return socket.Send(req)
 }
 
-func (c *client)Broadcast(fids  []int64, service,endpoint string, data []byte)error{
+func (c *client) Broadcast(fids []int64, service, endpoint string, data []byte) error {
 	req := &pack.ApPackage{
 		Header: &pack.Header{
 			Request: &pack.RequestMeta{
