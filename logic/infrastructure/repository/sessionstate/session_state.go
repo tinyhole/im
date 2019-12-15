@@ -33,20 +33,24 @@ func (s *sessionStateRepo) List(uid int64) ([]*valueobj.SessionInfo, error) {
 		err    error
 		prefix string
 		reply  interface{}
-		keys   []string
+		result []interface{}
 		datas  []string
 		rets   []*valueobj.SessionInfo
 	)
 	con := s.pool.Get()
 	defer con.Close()
 	prefix = s.prefixKey(uid)
-	reply, err = con.Do("keys", prefix)
+	reply, err = con.Do("scan",0, "match", prefix, "count",6)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	keys, err = redis.Strings(reply, err)
+	result, err = redis.Values(reply, err)
+	if err != nil{
+		return nil, errors.WithStack(err)
+	}
 	args := []interface{}{}
-	for _, itr := range keys {
+	keys , _ := redis.Strings(result[1],nil)
+	for _, itr := range keys  {
 		args = append(args, itr)
 	}
 	if len(args) == 0 {
@@ -59,7 +63,7 @@ func (s *sessionStateRepo) List(uid int64) ([]*valueobj.SessionInfo, error) {
 
 	datas, err = redis.Strings(reply, err)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	for _, itr := range datas {

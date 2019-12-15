@@ -70,7 +70,7 @@ func (a *AppService) PushMsg(msg *im.Msg) (err error) {
 func (a *AppService) ListSessionInfo(uid int64) ([]*valueobj.SessionInfo, error) {
 	rets, err := a.sessionStateRepo.List(uid)
 	if err != nil {
-		a.logger.Error("sessionStateRepo.List failed [%v]", err)
+		a.logger.Errorf("sessionStateRepo.List failed [%v]", err)
 		err = status.Error(codes.Internal, "list session info failed")
 	}
 
@@ -80,7 +80,7 @@ func (a *AppService) ListSessionInfo(uid int64) ([]*valueobj.SessionInfo, error)
 func (a *AppService) BatchListSessionInfo(uids []int64) ([]*valueobj.SessionInfo, error) {
 	rets, err := a.sessionStateRepo.BatchList(uids)
 	if err != nil {
-		a.logger.Error("sessionStateRepo.BatchList failed [%v]", err)
+		a.logger.Errorf("sessionStateRepo.BatchList failed [%v]", err)
 		err = status.Error(codes.Internal, "batch list session info failed")
 	}
 
