@@ -2,7 +2,6 @@ package service
 
 import (
 	"container/list"
-	"fmt"
 	"github.com/pkg/errors"
 	"github.com/tinyhole/im/idl/mua/im"
 	"github.com/tinyhole/im/idl/mua/im/relation"
@@ -61,7 +60,6 @@ func (j *JobService) groupChat(msg *entity.Message) (rets []*entity.Message, not
 	groupType, err := j.relationClient.GetGroupType(msg.DstID)
 	//写扩散
 	if groupType != int32(relation.GroupType_Super) {
-		fmt.Println("diffuseWrite")
 		rets, notifies, err = j.diffuseWrite(msg)
 	} else { //读扩散
 		rets, notifies, err = j.diffuseRead(msg)
