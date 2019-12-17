@@ -43,3 +43,15 @@ func (m messageConv) DO2DTO(src *entity.Message) *im.Msg {
 		InboxID:     src.InboxID,
 	}
 }
+
+func (m messageConv) SliceDO2DTO(src []*entity.Message) []*im.Msg {
+	if src == nil {
+		return nil
+	}
+
+	rets := make([]*im.Msg, len(src), len(src))
+	for idx, itr := range src {
+		rets[idx] = m.DO2DTO(itr)
+	}
+	return rets
+}

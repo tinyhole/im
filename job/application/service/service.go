@@ -7,6 +7,7 @@ import (
 	"github.com/tinyhole/im/job/infrastructure/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 type AppService struct {
@@ -46,4 +47,16 @@ func (a *AppService) SyncPrivateInboxMsg(uid int64, seq int64, page, pageSize in
 
 func (a *AppService) SyncPublicInboxMsg(uid int64) (msg []*entity.Message, err error) {
 	return nil, nil
+}
+
+func (a *AppService) SyncInboxMsg(inboxID string, seq int64, page, pageSize int32) (rets []*entity.Message, total int, err error) {
+	end := time.Now()
+	start := time.Now().Add(-7 * time.Hour * 24)
+	rets, total, err = a.msgRepo.List(inboxID, seq, start.Unix(), end.Unix(), page, pageSize)
+	if err != nil {
+		a.log.Errorf("JobSvc.SyncInboxMsg failed [%v]", err)
+		err = status.Error(codes.Internal, "sync inbox failed")
+		return
+	}
+	return
 }

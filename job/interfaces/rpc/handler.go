@@ -32,3 +32,13 @@ func (h *Handler) SyncPrivateInboxMsg(ctx context.Context, req *job.SyncPrivateI
 func (h *Handler) SyncPublicInboxMsg(ctx context.Context, req *job.SyncPublicInboxMsgReq, rsp *job.SyncPublicInboxMsgRsp) error {
 	return nil
 }
+
+func (h *Handler) SyncInboxMsg(ctx context.Context, req *job.SyncInboxMsgReq, rsp *job.SyncInboxMsgRsp) error {
+	rets, total, err := h.appSvc.SyncInboxMsg(req.InboxID, req.Seq, req.Page, req.PageSize)
+	if err != nil {
+		return err
+	}
+	rsp.Total = int32(total)
+	rsp.Msg = objconv.MessageConv.SliceDO2DTO(rets)
+	return nil
+}
