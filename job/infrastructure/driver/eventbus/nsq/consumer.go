@@ -2,17 +2,15 @@ package nsq
 
 import (
 	"github.com/pkg/errors"
-	"github.com/tinyhole/im/job/application/event"
-	"github.com/tinyhole/im/job/infrastructure/logger"
+	"github.com/tinyhole/im/logic/infrastructure/driver/eventbus"
+	"github.com/tinyhole/im/logic/infrastructure/logger"
 	"github.com/youzan/go-nsq"
 	"time"
 )
 
 type Options struct {
 	maxInFlight    int
-	nsqLookupdAddr string
-	nsqDAddr       string
-
+	nsqLookupdAddr []string
 	heartbeatInterval time.Duration
 }
 
@@ -24,7 +22,7 @@ func WithMaxInFlight(maxInFight int) Option {
 	}
 }
 
-func WithNSQLookupdAddr(addr string) Option {
+func WithNSQLookupdAddr(addr []string) Option {
 	return func(o *Options) {
 		o.nsqLookupdAddr = addr
 	}
@@ -36,17 +34,10 @@ func WithHeartbeatInterval(interval time.Duration) Option {
 	}
 }
 
-func WithNSQDAddr(addr string) Option {
-	return func(o *Options) {
-		o.nsqDAddr = addr
-	}
-}
-
 func NewOptions() *Options {
 	return &Options{
 		maxInFlight:       10000,
-		nsqLookupdAddr:    "127.0.0.1:4161",
-		nsqDAddr:          "127.0.0.1:4150",
+		nsqLookupdAddr:    []string{"127.0.0.1:4161"},
 		heartbeatInterval: time.Second,
 	}
 }
@@ -55,11 +46,12 @@ type NSQConsumer struct {
 	options *Options
 	topic   string
 	channel string
-	handler event.Handler
+	handler eventbus.Handler
 	log     logger.Logger
+	consumer *nsq.Consumer
 }
 
-func NewConsumer(topic, channel string, handler event.Handler, log logger.Logger, opts ...Option) (*NSQConsumer, error) {
+func NewConsumer(topic, channel string, handler eventbus.Handler, log logger.Logger, opts ...Option) (*NSQConsumer, error) {
 	options := NewOptions()
 	for _, o := range opts {
 		o(options)
@@ -80,18 +72,27 @@ func NewConsumer(topic, channel string, handler event.Handler, log logger.Logger
 	}
 	consumer.AddHandler(nsqConsumer)
 	consumer.SetLogger(nsqConsumer, nsq.LogLevelError)
-	err = consumer.ConnectToNSQLookupd(options.nsqLookupdAddr)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+	nsqConsumer.consumer = consumer
 	return nsqConsumer, nil
 }
 
+func (c *NSQConsumer)Connect()(err error){
+	err = c.consumer.ConnectToNSQLookupds(c.options.nsqLookupdAddr)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
 func (c *NSQConsumer) HandleMessage(message *nsq.Message) error {
-	return c.handler.HandleMsg(message.Body)
+	return c.handler.Handle(message.Body)
 }
 
 func (c *NSQConsumer) Output(calldepth int, s string) error {
 	c.log.Error(s)
 	return nil
+}
+
+func(c *NSQConsumer)Stop(){
+	c.consumer.Stop()
 }
