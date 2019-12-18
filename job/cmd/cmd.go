@@ -10,8 +10,8 @@ import (
 	dsvc "github.com/tinyhole/im/job/domain/service"
 	"github.com/tinyhole/im/job/domain/util"
 	"github.com/tinyhole/im/job/infrastructure/config"
+	"github.com/tinyhole/im/job/infrastructure/driver/eventbus/nsq"
 	"github.com/tinyhole/im/job/infrastructure/driver/mongo"
-	"github.com/tinyhole/im/job/infrastructure/driver/nsq"
 	"github.com/tinyhole/im/job/infrastructure/gateway"
 	"github.com/tinyhole/im/job/infrastructure/logger"
 	"github.com/tinyhole/im/job/infrastructure/repository"
@@ -64,7 +64,7 @@ func buildContainer() *dig.Container {
 	mustSccProvider(container, repository.NewInboxRepo)
 
 	//event bus
-	mustSccProvider(container, nsq.NewConsumerMgr)
+	mustSccProvider(container, nsq.NewManager)
 
 	//gateway
 	mustSccProvider(container, gateway.NewApClient)
@@ -86,11 +86,13 @@ func buildContainer() *dig.Container {
 
 func Run() {
 	container := buildContainer()
-	err := container.Invoke(func(microSvc micro.Service, appService *service.AppService, eventService *event.EventService) {
+	err := container.Invoke(func(microSvc micro.Service, appService *service.AppService,
+		eventService *event.EventService) {
 		eventService.Run()
 		microSvc.Init()
 		job.RegisterJobHandler(microSvc.Server(), rpc.NewHandler(appService))
 		microSvc.Run()
+		eventService.Stop()
 	})
 
 	if err != nil {

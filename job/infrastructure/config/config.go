@@ -7,14 +7,14 @@ import (
 )
 
 type Config struct {
-	MgoAddrs          []string `json:"mgoAddrs"`
-	MgoUser           string   `json:"mgoUser"`
-	MgoPassword       string   `json:"mgoPassword"`
-	MgoReplicaSetName string   `json:"mgoReplicaSetName"`
-	MgoPoolLimit      int      `json:"mgoPoolLimit"`
+	MgoAddrs          []string `json:"MgoAddrs"`
+	MgoUser           string   `json:"MgoUser"`
+	MgoPassword       string   `json:"MgoPassword"`
+	MgoReplicaSetName string   `json:"MgoReplicaSetName"`
+	MgoPoolLimit      int      `json:"MgoPoolLimit"`
 	LogFilePath       string   `json:"LogFilePath"`
 	LogLevel          string   `json:"LogLevel"`
-	NSQLookUpAddr     string   `json:"NSQLookUpAddr"`
+	NSQLookupdAddr    []string `json:"NSQLookUpAddr"`
 	NSQDAddr          string   `json:"NSQDAddr"`
 	NSQChannel        string   `json:"NSQChannel"`
 }

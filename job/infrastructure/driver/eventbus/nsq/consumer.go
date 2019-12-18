@@ -2,15 +2,15 @@ package nsq
 
 import (
 	"github.com/pkg/errors"
-	"github.com/tinyhole/im/logic/infrastructure/driver/eventbus"
-	"github.com/tinyhole/im/logic/infrastructure/logger"
+	eventbus2 "github.com/tinyhole/im/job/application/eventbus"
+	"github.com/tinyhole/im/job/infrastructure/logger"
 	"github.com/youzan/go-nsq"
 	"time"
 )
 
 type Options struct {
-	maxInFlight    int
-	nsqLookupdAddr []string
+	maxInFlight       int
+	nsqLookupdAddr    []string
 	heartbeatInterval time.Duration
 }
 
@@ -43,15 +43,15 @@ func NewOptions() *Options {
 }
 
 type NSQConsumer struct {
-	options *Options
-	topic   string
-	channel string
-	handler eventbus.Handler
-	log     logger.Logger
+	options  *Options
+	topic    string
+	channel  string
+	handler  eventbus2.Handler
+	log      logger.Logger
 	consumer *nsq.Consumer
 }
 
-func NewConsumer(topic, channel string, handler eventbus.Handler, log logger.Logger, opts ...Option) (*NSQConsumer, error) {
+func NewConsumer(topic, channel string, handler eventbus2.Handler, log logger.Logger, opts ...Option) (*NSQConsumer, error) {
 	options := NewOptions()
 	for _, o := range opts {
 		o(options)
@@ -76,7 +76,7 @@ func NewConsumer(topic, channel string, handler eventbus.Handler, log logger.Log
 	return nsqConsumer, nil
 }
 
-func (c *NSQConsumer)Connect()(err error){
+func (c *NSQConsumer) Connect() (err error) {
 	err = c.consumer.ConnectToNSQLookupds(c.options.nsqLookupdAddr)
 	if err != nil {
 		return errors.WithStack(err)
@@ -93,6 +93,7 @@ func (c *NSQConsumer) Output(calldepth int, s string) error {
 	return nil
 }
 
-func(c *NSQConsumer)Stop(){
+func (c *NSQConsumer) Stop() {
 	c.consumer.Stop()
+	<-c.consumer.StopChan
 }

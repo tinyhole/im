@@ -8,11 +8,12 @@ import (
 )
 
 type Config struct {
-	RedisAddr     string `json:"RedisAddr"`
-	RedisPassword string `json:"RedisPassword"`
-	NSQDAddr      string `json:"NSQDAddr"`
-	LogFilePath   string `json:"LogFilePath"`
-	LogLevel      string `json:"LogLevel"`
+	RedisAddr      string   `json:"RedisAddr"`
+	RedisPassword  string   `json:"RedisPassword"`
+	NSQDAddr       string   `json:"NSQDAddr"`
+	NSQLookupdAddr []string `json:"NSQLookupdAddr"`
+	LogFilePath    string   `json:"LogFilePath"`
+	LogLevel       string   `json:"LogLevel"`
 }
 
 func NewConfig(baseConf *BaseConfig) (*Config, error) {

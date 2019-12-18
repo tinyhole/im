@@ -15,6 +15,8 @@ It has these top-level messages:
 	SyncPublicInboxMsgReq
 	SyncPublicInboxMsgRsp
 	MsgNotify
+	SyncInboxMsgReq
+	SyncInboxMsgRsp
 */
 package job
 
@@ -49,8 +51,7 @@ var _ server.Option
 
 type JobService interface {
 	PullMsg(ctx context.Context, in *PullMsgReq, opts ...client.CallOption) (*PullMsgRsp, error)
-	SyncPrivateInboxMsg(ctx context.Context, in *SyncPrivateInboxMsgReq, opts ...client.CallOption) (*SyncPrivateInboxMsgRsp, error)
-	SyncPublicInboxMsg(ctx context.Context, in *SyncPublicInboxMsgReq, opts ...client.CallOption) (*SyncPublicInboxMsgRsp, error)
+	SyncInboxMsg(ctx context.Context, in *SyncInboxMsgReq, opts ...client.CallOption) (*SyncInboxMsgRsp, error)
 }
 
 type jobService struct {
@@ -81,19 +82,9 @@ func (c *jobService) PullMsg(ctx context.Context, in *PullMsgReq, opts ...client
 	return out, nil
 }
 
-func (c *jobService) SyncPrivateInboxMsg(ctx context.Context, in *SyncPrivateInboxMsgReq, opts ...client.CallOption) (*SyncPrivateInboxMsgRsp, error) {
-	req := c.c.NewRequest(c.name, "Job.SyncPrivateInboxMsg", in)
-	out := new(SyncPrivateInboxMsgRsp)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *jobService) SyncPublicInboxMsg(ctx context.Context, in *SyncPublicInboxMsgReq, opts ...client.CallOption) (*SyncPublicInboxMsgRsp, error) {
-	req := c.c.NewRequest(c.name, "Job.SyncPublicInboxMsg", in)
-	out := new(SyncPublicInboxMsgRsp)
+func (c *jobService) SyncInboxMsg(ctx context.Context, in *SyncInboxMsgReq, opts ...client.CallOption) (*SyncInboxMsgRsp, error) {
+	req := c.c.NewRequest(c.name, "Job.SyncInboxMsg", in)
+	out := new(SyncInboxMsgRsp)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -105,15 +96,13 @@ func (c *jobService) SyncPublicInboxMsg(ctx context.Context, in *SyncPublicInbox
 
 type JobHandler interface {
 	PullMsg(context.Context, *PullMsgReq, *PullMsgRsp) error
-	SyncPrivateInboxMsg(context.Context, *SyncPrivateInboxMsgReq, *SyncPrivateInboxMsgRsp) error
-	SyncPublicInboxMsg(context.Context, *SyncPublicInboxMsgReq, *SyncPublicInboxMsgRsp) error
+	SyncInboxMsg(context.Context, *SyncInboxMsgReq, *SyncInboxMsgRsp) error
 }
 
 func RegisterJobHandler(s server.Server, hdlr JobHandler, opts ...server.HandlerOption) error {
 	type job interface {
 		PullMsg(ctx context.Context, in *PullMsgReq, out *PullMsgRsp) error
-		SyncPrivateInboxMsg(ctx context.Context, in *SyncPrivateInboxMsgReq, out *SyncPrivateInboxMsgRsp) error
-		SyncPublicInboxMsg(ctx context.Context, in *SyncPublicInboxMsgReq, out *SyncPublicInboxMsgRsp) error
+		SyncInboxMsg(ctx context.Context, in *SyncInboxMsgReq, out *SyncInboxMsgRsp) error
 	}
 	type Job struct {
 		job
@@ -130,10 +119,6 @@ func (h *jobHandler) PullMsg(ctx context.Context, in *PullMsgReq, out *PullMsgRs
 	return h.JobHandler.PullMsg(ctx, in, out)
 }
 
-func (h *jobHandler) SyncPrivateInboxMsg(ctx context.Context, in *SyncPrivateInboxMsgReq, out *SyncPrivateInboxMsgRsp) error {
-	return h.JobHandler.SyncPrivateInboxMsg(ctx, in, out)
-}
-
-func (h *jobHandler) SyncPublicInboxMsg(ctx context.Context, in *SyncPublicInboxMsgReq, out *SyncPublicInboxMsgRsp) error {
-	return h.JobHandler.SyncPublicInboxMsg(ctx, in, out)
+func (h *jobHandler) SyncInboxMsg(ctx context.Context, in *SyncInboxMsgReq, out *SyncInboxMsgRsp) error {
+	return h.JobHandler.SyncInboxMsg(ctx, in, out)
 }

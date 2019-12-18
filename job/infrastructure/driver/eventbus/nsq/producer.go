@@ -2,46 +2,35 @@ package nsq
 
 import (
 	"github.com/pkg/errors"
-	"github.com/tinyhole/im/logic/infrastructure/logger"
+	"github.com/tinyhole/im/job/infrastructure/logger"
 	"github.com/youzan/go-nsq"
 	"time"
 )
 
-
-type NSQProducer struct{
-	conf *nsq.Config
+type NSQProducer struct {
 	nsqProducer *nsq.Producer
-	topic string
-	log logger.Logger
+	topic       string
+	log         logger.Logger
 }
 
-
-
-func NewProducer(topic,addr string, log logger.Logger)(*NSQProducer,error){
-	conf := nsq.NewConfig()
-	conf.HeartbeatInterval = time.Second
-	p, err := nsq.NewProducer(addr, conf)
-	if err !=  nil {
-		return nil, errors.WithStack(err)
-	}
+func NewProducer(topic string, p *nsq.Producer, log logger.Logger) (*NSQProducer, error) {
 	ret := &NSQProducer{
-		conf:        conf,
 		nsqProducer: p,
-		topic:topic,
-		log:log,
+		topic:       topic,
+		log:         log,
 	}
-	p.SetLogger(ret,nsq.LogLevelError)
+	p.SetLogger(ret, nsq.LogLevelError)
 	return ret, nil
 }
 
-func (p *NSQProducer)	Output(calldepth int, s string) error{
+func (p *NSQProducer) Output(calldepth int, s string) error {
 	p.log.Error(s)
 	return nil
 }
 
-func (p *NSQProducer)AsyncPublish(data []byte)error{
+func (p *NSQProducer) AsyncPublish(data []byte) error {
 	doneChan := make(chan *nsq.ProducerTransaction)
-	p.nsqProducer.PublishAsync(p.topic,data, doneChan)
+	p.nsqProducer.PublishAsync(p.topic, data, doneChan)
 
 	select {
 	case <-doneChan:
@@ -52,7 +41,6 @@ func (p *NSQProducer)AsyncPublish(data []byte)error{
 	return nil
 }
 
-func(p *NSQProducer)Stop(){
+func (p *NSQProducer) Stop() {
 	p.nsqProducer.Stop()
 }
-

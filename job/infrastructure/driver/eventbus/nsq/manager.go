@@ -2,26 +2,29 @@ package nsq
 
 import (
 	"github.com/pkg/errors"
-	"github.com/tinyhole/im/logic/infrastructure/config"
-	"github.com/tinyhole/im/logic/infrastructure/driver/eventbus"
-	"github.com/tinyhole/im/logic/infrastructure/logger"
+	"github.com/tinyhole/im/job/application/eventbus"
+	"github.com/tinyhole/im/job/infrastructure/config"
+	"github.com/tinyhole/im/job/infrastructure/logger"
+	"github.com/youzan/go-nsq"
+	"time"
 )
 
 type Manager struct {
 	nsqLookdAddr []string
-	consumers   map[string]*NSQConsumer
-	producers  map[string]*NSQProducer
-	nsqdAddr    string
-	log         logger.Logger
+	consumers    map[string]*NSQConsumer
+	producers    map[string]*NSQProducer
+	nsqdAddr     string
+	nsqProducer  *nsq.Producer
+	log          logger.Logger
 }
 
-func NewManager(conf *config.Config, log logger.Logger) eventbus.Manager{
+func NewManager(conf *config.Config, log logger.Logger) eventbus.Manager {
 	return &Manager{
 		nsqLookdAddr: conf.NSQLookupdAddr,
-		consumers:   make(map[string]*NSQConsumer),
-		producers: make(map[string]*NSQProducer),
-		nsqdAddr:    conf.NSQDAddr,
-		log:         log,
+		consumers:    make(map[string]*NSQConsumer),
+		producers:    make(map[string]*NSQProducer),
+		nsqdAddr:     conf.NSQDAddr,
+		log:          log,
 	}
 }
 
@@ -34,9 +37,19 @@ func (m *Manager) AddConsumer(handler eventbus.Handler) error {
 	return nil
 }
 
-func(m *Manager)NewPublisher(topic string)(eventbus.Publisher,error){
-	producer , err := NewProducer(topic, m.nsqdAddr,m.log)
-	if err !=nil{
+func (m *Manager) NewPublisher(topic string) (eventbus.Publisher, error) {
+	if m.nsqProducer == nil {
+		conf := nsq.NewConfig()
+		conf.HeartbeatInterval = time.Second
+		p, err := nsq.NewProducer(m.nsqdAddr, conf)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+		m.nsqProducer = p
+	}
+
+	producer, err := NewProducer(topic, m.nsqProducer, m.log)
+	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
@@ -44,24 +57,19 @@ func(m *Manager)NewPublisher(topic string)(eventbus.Publisher,error){
 	return producer, nil
 }
 
-func (m *Manager)Run()(err error){
-	for _, v := range m.consumers{
+func (m *Manager) Run() (err error) {
+	for _, v := range m.consumers {
 		err = v.Connect()
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-
-func(m *Manager)Stop(){
-	for _, v := range m.consumers{
+func (m *Manager) Stop() {
+	for _, v := range m.consumers {
 		v.Stop()
 	}
-
-	for _, v := range m.producers{
-		v.Stop()
-	}
+	m.nsqProducer.Stop()
 }
-

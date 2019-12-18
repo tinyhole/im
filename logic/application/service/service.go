@@ -1,7 +1,10 @@
 package service
 
 import (
+	"github.com/gogo/protobuf/proto"
+	"github.com/pkg/errors"
 	"github.com/tinyhole/im/idl/mua/im"
+	eventbus2 "github.com/tinyhole/im/logic/application/eventbus"
 	"github.com/tinyhole/im/logic/domain/repository"
 	"github.com/tinyhole/im/logic/domain/service"
 	"github.com/tinyhole/im/logic/domain/valueobj"
@@ -13,20 +16,27 @@ import (
 type AppService struct {
 	sessionStateRepo repository.SessionStateRepository
 	sessionSvc       *service.SessionService
-	msgRepo          repository.MsgRepository
+	eventBusMgr      eventbus2.Manager
 	logger           logger.Logger
+	publisher        eventbus2.Publisher
 }
 
 func NewAppService(stateRepository repository.SessionStateRepository,
 	sessionSvc *service.SessionService,
-	msgRepo repository.MsgRepository,
-	logger logger.Logger) *AppService {
-	return &AppService{
+	eventBusMgr eventbus2.Manager,
+	logger logger.Logger) (*AppService, error) {
+	ret := &AppService{
 		sessionStateRepo: stateRepository,
 		sessionSvc:       sessionSvc,
-		msgRepo:          msgRepo,
 		logger:           logger,
+		eventBusMgr:      eventBusMgr,
 	}
+	publisher, err := ret.eventBusMgr.NewPublisher("mua.im.chat_msg")
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	ret.publisher = publisher
+	return ret, nil
 }
 
 func (a *AppService) Ping(uid int64, apSrvID int32, apSessionID int64) (err error) {
@@ -59,7 +69,12 @@ func (a *AppService) SignIn(uid int64, deviceType int32, token string,
 }
 
 func (a *AppService) PushMsg(msg *im.Msg) (err error) {
-	err = a.msgRepo.PushMsg(msg)
+	byteMsg, err := proto.Marshal(msg)
+	if err != nil {
+		a.logger.Errorf("marshal msg failed [%v]", err)
+		return status.Error(codes.InvalidArgument, "marshal msg failed")
+	}
+	err = a.publisher.AsyncPublish(byteMsg)
 	if err != nil {
 		a.logger.Errorf("push msg error [%v]", err)
 		return status.Error(codes.Internal, "send msg error")

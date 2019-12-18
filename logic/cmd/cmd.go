@@ -5,14 +5,14 @@ import (
 	"github.com/micro/go-micro"
 	"github.com/spf13/cobra"
 	"github.com/tinyhole/im/idl/mua/im/logic"
+	eventbus2 "github.com/tinyhole/im/logic/application/eventbus"
 	"github.com/tinyhole/im/logic/application/service"
 	dsvc "github.com/tinyhole/im/logic/domain/service"
 	"github.com/tinyhole/im/logic/infrastructure/config"
-	"github.com/tinyhole/im/logic/infrastructure/driver/nsq"
+	"github.com/tinyhole/im/logic/infrastructure/driver/eventbus/nsq"
 	"github.com/tinyhole/im/logic/infrastructure/driver/redis"
 	"github.com/tinyhole/im/logic/infrastructure/gateway"
 	"github.com/tinyhole/im/logic/infrastructure/logger"
-	"github.com/tinyhole/im/logic/infrastructure/repository/msg"
 	"github.com/tinyhole/im/logic/infrastructure/repository/sessionstate"
 	"github.com/tinyhole/im/logic/infrastructure/server"
 	"github.com/tinyhole/im/logic/interfaces/rpc"
@@ -59,9 +59,9 @@ func buildContainer() *dig.Container {
 	mustSccProvider(container, logger.NewLogger)
 
 	mustSccProvider(container, redis.NewRedisPool)
-	mustSccProvider(container, nsq.NewProducer)
-	mustSccProvider(container, msg.NewMsgRepo)
 	mustSccProvider(container, sessionstate.NewSessionStateRepo)
+
+	mustSccProvider(container, nsq.NewManager)
 
 	mustSccProvider(container, gateway.NewAuthClient)
 
@@ -76,10 +76,15 @@ func Run() {
 		err error
 	)
 	container := buildContainer()
-	err = container.Invoke(func(microSvc micro.Service, appService *service.AppService) {
+	err = container.Invoke(func(microSvc micro.Service, appService *service.AppService, eventMgr eventbus2.Manager) {
 		microSvc.Init()
 		logic.RegisterLogicHandler(microSvc.Server(), rpc.NewHandler(appService))
+		err := eventMgr.Run()
+		if err != nil {
+			return
+		}
 		microSvc.Run()
+		eventMgr.Stop()
 	})
 	fmt.Printf("%v", err)
 }

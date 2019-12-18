@@ -40,17 +40,17 @@ func (s *sessionStateRepo) List(uid int64) ([]*valueobj.SessionInfo, error) {
 	con := s.pool.Get()
 	defer con.Close()
 	prefix = s.prefixKey(uid)
-	reply, err = con.Do("scan",0, "match", prefix, "count",6)
+	reply, err = con.Do("scan", 0, "match", prefix, "count", 6)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	result, err = redis.Values(reply, err)
-	if err != nil{
+	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	args := []interface{}{}
-	keys , _ := redis.Strings(result[1],nil)
-	for _, itr := range keys  {
+	keys, _ := redis.Strings(result[1], nil)
+	for _, itr := range keys {
 		args = append(args, itr)
 	}
 	if len(args) == 0 {

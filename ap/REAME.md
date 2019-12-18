@@ -12,6 +12,6 @@
 # test 
 ```shell script
 export ETCDCTL_API=3
-etcdctl put /conf/mua/im/ap/ '{"ApPort":8080,"LogFilePath":"../log/logic.log","LogLevel":"debug"}'
+etcdctl put /conf/mua/im/ap/ '{"ApPort":8080,"LogFilePath":"../log/ap.log","LogLevel":"debug"}'
 etcdctl get /conf/mua/im/ap --prefix
 ````

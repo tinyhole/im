@@ -31,7 +31,7 @@ func NewMsgHandler(svc *service.JobService,
 	}
 }
 
-func (m *MsgHandler) HandleMsg(data []byte) (err error) {
+func (m *MsgHandler) Handle(data []byte) (err error) {
 	rawMsg := im.Msg{}
 	err = proto.Unmarshal(data, &rawMsg)
 	msg := objconv.MessageConv.DTO2DO(&rawMsg)
@@ -69,4 +69,8 @@ func (m *MsgHandler) HandleMsg(data []byte) (err error) {
 
 func (m *MsgHandler) Topic() string {
 	return "mua.im.chat_msg"
+}
+
+func (m *MsgHandler) Chan() string {
+	return "mua.im.job"
 }
